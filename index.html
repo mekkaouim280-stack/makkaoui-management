@@ -1400,8 +1400,7 @@ try{
 ========================================================= */
 
 const KEY =
-'makkaoui_management_v2';
-
+'makkaoui_management_v1';
 
 function blank(){
 
@@ -1431,6 +1430,34 @@ function blank(){
 
 
 function loadDB(){
+
+  try{
+
+    const oldData =
+      localStorage.getItem('makkaoui_management_v1');
+
+    const newData =
+      localStorage.getItem('makkaoui_management_v2');
+
+    const saved =
+      JSON.parse(
+        oldData || newData || '{}'
+      );
+
+    return Object.assign(
+      blank(),
+      saved
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    return blank();
+
+  }
+
+}
 
   try{
 
@@ -1558,11 +1585,130 @@ function toast(message){
    SAVE LOCAL + CLOUD
 ========================================================= */
 
-async function saveDB(){
+async function loadCloudDB(showMessage=false){
 
-  /*
-    أولاً نحفظ محلياً دائماً
-  */
+  if(!supabaseClient){
+
+    if(showMessage){
+      toast('تعذر الاتصال بـ Supabase');
+    }
+
+    return;
+
+  }
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from('app_state')
+        .select('data')
+        .eq('id',1)
+        .maybeSingle();
+
+    if(error)
+      throw error;
+
+
+    const hasLocalData =
+      db.products.length > 0 ||
+      db.sales.length > 0 ||
+      db.expenses.length > 0 ||
+      db.customers.length > 0 ||
+      db.suppliers.length > 0;
+
+
+    /*
+      إذا كانت عندنا بيانات محلية:
+      نخلي البيانات المحلية هي الأساس
+      وما نخليوش Cloud تبدلها تلقائياً.
+    */
+
+    if(hasLocalData){
+
+      await supabaseClient
+        .from('app_state')
+        .upsert({
+          id:1,
+          data:db,
+          updated_at:new Date().toISOString()
+        });
+
+      localStorage.setItem(
+        KEY,
+        JSON.stringify(db)
+      );
+
+      if(showMessage){
+        toast('تمت مزامنة البيانات المحلية مع السحابة ☁️');
+      }
+
+      return;
+    }
+
+
+    /*
+      إذا كان الجهاز خاوي:
+      هنا فقط ناخذ البيانات من Cloud.
+    */
+
+    if(data && data.data){
+
+      db =
+        Object.assign(
+          blank(),
+          data.data
+        );
+
+      localStorage.setItem(
+        KEY,
+        JSON.stringify(db)
+      );
+
+      renderAll();
+
+      if(showMessage){
+        toast('تم تحميل البيانات من السحابة ☁️');
+      }
+
+      return;
+    }
+
+
+    /*
+      إذا كانت Cloud خاوية والجهاز خاوي:
+      ننشئو أول نسخة.
+    */
+
+    await supabaseClient
+      .from('app_state')
+      .upsert({
+        id:1,
+        data:db,
+        updated_at:new Date().toISOString()
+      });
+
+    if(showMessage){
+      toast('تم إنشاء قاعدة البيانات السحابية ☁️');
+    }
+
+  }catch(error){
+
+    console.error(
+      'Cloud load error:',
+      error
+    );
+
+    if(showMessage){
+      toast('خدام محلياً — تعذر الاتصال بالسحابة');
+    }
+
+  }
+
+}
 
   localStorage.setItem(
     KEY,
@@ -3029,7 +3175,32 @@ function renderSettings(){
 /* =========================================================
    RENDER ALL
 ========================================================= */
+function ensureCategoryOptions(){
 
+  const select =
+    document.getElementById('pCategory');
+
+  if(!select)
+    return;
+
+  const categories = [
+    'سراويل',
+    'تيشورتات',
+    'قمصان',
+    'سبرديلات',
+    'جاكيتات',
+    'أخرى'
+  ];
+
+  select.innerHTML = categories
+    .map(category =>
+      `<option value="${category}">
+        ${category}
+      </option>`
+    )
+    .join('');
+
+}
 function renderAll(){
 
   renderDashboard();
