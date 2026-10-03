@@ -1359,331 +1359,120 @@ th{
 const SUPABASE_URL =
 'https://lxidsrwfwxrbdqyyjezd.supabase.co';
 
-/*
-  مهم:
-  بدّل YOUR_PUBLISHABLE_KEY بالمفتاح Publishable key
-  من Supabase.
-*/
 const SUPABASE_PUBLISHABLE_KEY =
 'sb_publishable_NzoLeXzSFHerv3Ehmz_B-A_clNpchjh';
-
 
 let supabaseClient = null;
 
 try{
-
-  if(
-    window.supabase &&
-    SUPABASE_PUBLISHABLE_KEY !== 'YOUR_PUBLISHABLE_KEY'
-  ){
-
-    supabaseClient =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-      );
-
+  if(window.supabase && SUPABASE_PUBLISHABLE_KEY !== 'YOUR_PUBLISHABLE_KEY'){
+    supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
   }
-
 }catch(error){
-
-  console.error(
-    'Supabase initialization error:',
-    error
-  );
-
-
-
+  console.error('Supabase initialization error:', error);
+}
 
 /* =========================================================
    LOCAL DATABASE
 ========================================================= */
 
-const KEY =
-'makkaoui_management_v1';
+const KEY='makkaoui_management_v1';
 
 function blank(){
-
   return {
-
     products:[],
-
     sales:[],
-
     expenses:[],
-
     customers:[],
-
     suppliers:[],
-
     payments:[],
-
     settings:{
       shop:'Makkaoui Clothes',
       manager:'',
       minStock:3
     }
-
   };
-
 }
-
 
 function loadDB(){
-
   try{
-
-    const oldData =
-      localStorage.getItem('makkaoui_management_v1');
-
-    const newData =
-      localStorage.getItem('makkaoui_management_v2');
-
-    const saved =
-      JSON.parse(
-        oldData || newData || '{}'
-      );
-
-    return Object.assign(
-      blank(),
-      saved
+    const saved=JSON.parse(
+      localStorage.getItem(KEY) || '{}'
     );
-
+    return Object.assign(blank(),saved);
   }catch(error){
-
-    console.error(error);
-
+    console.error('Local database error:',error);
     return blank();
-
   }
-
 }
 
-  try{
-
-    const saved =
-      JSON.parse(
-        localStorage.getItem(KEY) || '{}'
-      );
-
-    return Object.assign(
-      blank(),
-      saved
-    );
-
-  }catch(error){
-
-    console.error(error);
-
-    return blank();
-
-  }
-
-}
-
-
-let db = loadDB();
-
+let db=loadDB();
 
 /* =========================================================
    HELPERS
 ========================================================= */
 
 function id(){
-
-  return Date.now().toString(36)
-    +
-    Math.random()
-      .toString(36)
-      .slice(2,8);
-
+  return Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 }
-
 
 function money(value){
-
-  return Number(value || 0)
-    .toLocaleString(
-      'fr-MA',
-      {
-        minimumFractionDigits:2,
-        maximumFractionDigits:2
-      }
-    )
-    +
-    ' DH';
-
+  return Number(value || 0).toLocaleString('fr-MA',{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  })+' DH';
 }
-
 
 function number(value){
-
   return Number(value || 0);
-
 }
-
 
 function dateNow(){
-
   return new Date().toISOString();
-
 }
-
 
 function formatDate(value){
-
   if(!value) return '';
-
-  const d =
-    new Date(value);
-
-  return d.toLocaleDateString(
-    'fr-MA'
-  );
-
+  return new Date(value).toLocaleDateString('fr-MA');
 }
 
-
 function escapeHtml(value){
-
   return String(value ?? '')
     .replaceAll('&','&amp;')
     .replaceAll('<','&lt;')
     .replaceAll('>','&gt;')
     .replaceAll('"','&quot;')
     .replaceAll("'","&#039;");
-
 }
-
 
 function toast(message){
-
-  const el =
-    document.getElementById('toast');
-
-  el.textContent =
-    message;
-
+  const el=document.getElementById('toast');
+  if(!el) return;
+  el.textContent=message;
   el.classList.add('show');
-
-  clearTimeout(
-    window.toastTimer
-  );
-
-  window.toastTimer =
-    setTimeout(
-      ()=>{
-        el.classList.remove('show');
-      },
-      3000
-    );
-
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>{
+    el.classList.remove('show');
+  },3000);
 }
-
 
 /* =========================================================
    SAVE LOCAL + CLOUD
 ========================================================= */
 
-async function loadCloudDB(showMessage=false){
+async function saveDB(){
+  localStorage.setItem(KEY,JSON.stringify(db));
+  renderAll();
 
   if(!supabaseClient){
-
-    if(showMessage){
-      toast('تعذر الاتصال بـ Supabase');
-    }
-
     return;
-
   }
 
   try{
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from('app_state')
-        .select('data')
-        .eq('id',1)
-        .maybeSingle();
-
-    if(error)
-      throw error;
-
-
-    const hasLocalData =
-      db.products.length > 0 ||
-      db.sales.length > 0 ||
-      db.expenses.length > 0 ||
-      db.customers.length > 0 ||
-      db.suppliers.length > 0;
-
-
-    /*
-      إذا كانت عندنا بيانات محلية:
-      نخلي البيانات المحلية هي الأساس
-      وما نخليوش Cloud تبدلها تلقائياً.
-    */
-
-    if(hasLocalData){
-
-      await supabaseClient
-        .from('app_state')
-        .upsert({
-          id:1,
-          data:db,
-          updated_at:new Date().toISOString()
-        });
-
-      localStorage.setItem(
-        KEY,
-        JSON.stringify(db)
-      );
-
-      if(showMessage){
-        toast('تمت مزامنة البيانات المحلية مع السحابة ☁️');
-      }
-
-      return;
-    }
-
-
-    /*
-      إذا كان الجهاز خاوي:
-      هنا فقط ناخذ البيانات من Cloud.
-    */
-
-    if(data && data.data){
-
-      db =
-        Object.assign(
-          blank(),
-          data.data
-        );
-
-      localStorage.setItem(
-        KEY,
-        JSON.stringify(db)
-      );
-
-      renderAll();
-
-      if(showMessage){
-        toast('تم تحميل البيانات من السحابة ☁️');
-      }
-
-      return;
-    }
-
-
-    /*
-      إذا كانت Cloud خاوية والجهاز خاوي:
-      ننشئو أول نسخة.
-    */
-
-    await supabaseClient
+    const {error}=await supabaseClient
       .from('app_state')
       .upsert({
         id:1,
@@ -1691,162 +1480,39 @@ async function loadCloudDB(showMessage=false){
         updated_at:new Date().toISOString()
       });
 
-    if(showMessage){
-      toast('تم إنشاء قاعدة البيانات السحابية ☁️');
-    }
+    if(error) throw error;
 
+    console.log('Cloud sync: OK');
   }catch(error){
-
-    console.error(
-      'Cloud load error:',
-      error
-    );
-
-    if(showMessage){
-      toast('خدام محلياً — تعذر الاتصال بالسحابة');
-    }
-
+    console.error('Cloud sync error:',error);
+    toast('تحفظات محلياً، ولكن Cloud ما تخدماتش');
   }
-
 }
-
-  localStorage.setItem(
-    KEY,
-    JSON.stringify(db)
-  );
-
-  renderAll();
-
-
-  /*
-    من بعد نحاول Cloud
-  */
-
-  if(!supabaseClient){
-
-    console.log(
-      'Supabase غير مفعّل حالياً'
-    );
-
-    return;
-
-  }
-
-
-  try{
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from('app_state')
-        .upsert({
-          id:1,
-          data:db,
-          updated_at:new Date().toISOString()
-        });
-
-
-    if(error)
-      throw error;
-
-
-    console.log(
-      'Cloud sync: OK'
-    );
-
-
-  }catch(error){
-
-    console.error(
-      'Cloud sync error:',
-      error
-    );
-
-    toast(
-      'تحفظات محلياً، ولكن Cloud ما تخدماتش'
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   LOAD CLOUD DATABASE
-========================================================= */
 
 async function loadCloudDB(showMessage=false){
-
   if(!supabaseClient){
-
-    if(showMessage){
-
-      toast(
-        'دخل Publishable key ديال Supabase أولاً'
-      );
-
-    }
-
+    if(showMessage) toast('تعذر الاتصال بـ Supabase');
     return;
-
   }
 
-
   try{
+    const {data,error}=await supabaseClient
+      .from('app_state')
+      .select('data')
+      .eq('id',1)
+      .maybeSingle();
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient
-        .from('app_state')
-        .select('data')
-        .eq('id',1)
-        .maybeSingle();
+    if(error) throw error;
 
+    const hasLocalData =
+      db.products.length>0 ||
+      db.sales.length>0 ||
+      db.expenses.length>0 ||
+      db.customers.length>0 ||
+      db.suppliers.length>0;
 
-    if(error)
-      throw error;
-
-
-    if(
-      data &&
-      data.data
-    ){
-
-      db =
-        Object.assign(
-          blank(),
-          data.data
-        );
-
-
-      localStorage.setItem(
-        KEY,
-        JSON.stringify(db)
-      );
-
-
-      renderAll();
-
-
-      if(showMessage){
-
-        toast(
-          'تمت المزامنة مع السحابة ☁️'
-        );
-
-      }
-
-    }else{
-
-      /*
-        إذا كانت قاعدة السحابة خاوية،
-        نرسل البيانات المحلية إليها.
-      */
-
-      await supabaseClient
+    if(hasLocalData){
+      const {error:upsertError}=await supabaseClient
         .from('app_state')
         .upsert({
           id:1,
@@ -1854,34 +1520,46 @@ async function loadCloudDB(showMessage=false){
           updated_at:new Date().toISOString()
         });
 
+      if(upsertError) throw upsertError;
 
-      console.log(
-        'Cloud database initialized'
-      );
+      localStorage.setItem(KEY,JSON.stringify(db));
 
+      if(showMessage)
+        toast('تمت مزامنة البيانات المحلية مع السحابة ☁️');
+
+      return;
     }
 
+    if(data && data.data){
+      db=Object.assign(blank(),data.data);
+      localStorage.setItem(KEY,JSON.stringify(db));
+      renderAll();
+
+      if(showMessage)
+        toast('تم تحميل البيانات من السحابة ☁️');
+
+      return;
+    }
+
+    const {error:insertError}=await supabaseClient
+      .from('app_state')
+      .upsert({
+        id:1,
+        data:db,
+        updated_at:new Date().toISOString()
+      });
+
+    if(insertError) throw insertError;
+
+    if(showMessage)
+      toast('تم إنشاء قاعدة البيانات السحابية ☁️');
 
   }catch(error){
-
-    console.error(
-      'Cloud load error:',
-      error
-    );
-
-
-    if(showMessage){
-
-      toast(
-        'تعذر الاتصال بالسحابة'
-      );
-
-    }
-
+    console.error('Cloud load error:',error);
+    if(showMessage)
+      toast('خدام محلياً — تعذر الاتصال بالسحابة');
   }
-
 }
-
 
 /* =========================================================
    NAVIGATION
@@ -3202,6 +2880,8 @@ function ensureCategoryOptions(){
 
 }
 function renderAll(){
+
+  ensureCategoryOptions();
 
   renderDashboard();
 
