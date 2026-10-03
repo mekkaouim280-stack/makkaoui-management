@@ -1,178 +1,1597 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Makkaoui Management</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-:root{--navy:#08244b;--blue:#1769ff;--bg:#f4f7fc;--text:#142746;--muted:#71819a;--line:#e4ebf5;--green:#079669;--red:#d83c55;--card:#fff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Tahoma,Arial,sans-serif;color:var(--text)}
-button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff;font-weight:700}
-button.secondary{background:#edf3ff;color:#164da7}button.danger{background:#fff0f2;color:#bd2b43}button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
-.layout{display:grid;grid-template-columns:245px 1fr;min-height:100vh}.sidebar{background:linear-gradient(180deg,#08244b,#061a38);color:#fff;padding:22px 15px;display:flex;flex-direction:column;gap:8px}.brand{padding:6px 12px 24px;border-bottom:1px solid #294366;margin-bottom:10px}.logo{font-size:27px;font-weight:900;color:#58a0ff;letter-spacing:1px}.brand small{display:block;color:#b9cbe7;margin-top:4px}.nav{display:flex;align-items:center;gap:12px;width:100%;text-align:right;background:transparent;color:#d8e4f6;padding:13px 14px;border-radius:10px}.nav.active,.nav:hover{background:#1769ff;color:white}.nav span{width:24px;text-align:center;font-size:18px}.sidebar .foot{margin-top:auto;color:#9fb4d4;font-size:12px;text-align:center;padding:16px}
-main{min-width:0}.topbar{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:12px}.topbar .small{font-size:13px;color:var(--muted)}.top-actions{display:flex;gap:8px;align-items:center}.content{padding:26px;max-width:1600px;margin:auto}.heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:22px}.heading h1{margin:0 0 7px;font-size:25px}.heading p{margin:0;color:var(--muted);font-size:13px}.filters{display:flex;gap:8px;flex-wrap:wrap}
-.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px}.metric{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:0 4px 14px #14274606}.metric .label{color:var(--muted);font-size:13px}.metric .value{font-size:25px;font-weight:800;margin:13px 0 7px;overflow-wrap:anywhere}.metric .note{font-size:12px;color:var(--muted)}.metric.blue{border-top:3px solid #3181ff}.metric.green{border-top:3px solid #10ae7b}.metric.orange{border-top:3px solid #f0a33b}.metric.purple{border-top:3px solid #9271ed}
-.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:19px;margin-bottom:18px;box-shadow:0 4px 14px #14274606}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.panel h2{font-size:17px;margin:0}.muted{color:var(--muted);font-size:13px}.grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.quick-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.quick-actions button{padding:16px 10px;min-height:70px}.quick-actions button span{display:block;font-size:20px;margin-bottom:6px}
-.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}th,td{padding:13px 11px;border-bottom:1px solid #edf1f7;text-align:right}th{background:#f7f9fd;color:#667791;font-weight:700}tr:last-child td{border-bottom:0}.empty{text-align:center;color:var(--muted);padding:28px}.tag{display:inline-block;padding:5px 9px;border-radius:20px;background:#e8f8f1;color:#08794f;font-size:12px}.tag.red{background:#fff0f2;color:#bd2b43}.tag.orange{background:#fff5e5;color:#9a6100}
-.page{display:none}.page.active{display:block}
-.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field label{font-size:13px;color:#5c6c83;font-weight:700}.field input,.field select,.field textarea,.search{width:100%;padding:11px 12px;border:1px solid #dce5f1;border-radius:9px;background:#fff;outline:none;min-width:0}.field input:focus,.field select:focus{border-color:#4a8cff;box-shadow:0 0 0 3px #1769ff14}.form-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.toolbar .search{max-width:280px}.notice{background:#eef5ff;border:1px solid #d6e5ff;border-radius:11px;padding:12px 14px;color:#28528a;font-size:13px;margin-bottom:15px}.small-btn{padding:6px 9px;font-size:12px}.danger-text{color:var(--red)}.footer-note{font-size:12px;color:var(--muted);line-height:1.8;margin-top:14px}
-@media(max-width:1050px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}.layout{grid-template-columns:205px 1fr}.content{padding:18px}}
-@media(max-width:700px){.layout{display:block}.sidebar{position:sticky;top:0;z-index:5;padding:9px;flex-direction:row;overflow-x:auto;align-items:center}.brand{padding:4px 8px;margin:0;border:0;min-width:100px}.logo{font-size:17px}.brand small,.sidebar .foot{display:none}.nav{width:auto;min-width:max-content;padding:10px}.nav span{width:auto}.nav .nav-label{display:none}.topbar{height:auto;padding:12px 15px}.content{padding:14px}.heading{align-items:flex-start;flex-direction:column}.cards{gap:9px}.metric{padding:13px}.metric .value{font-size:20px}.form-grid{grid-template-columns:1fr}.quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar .small{display:none}}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Arial,Tahoma,sans-serif;
+  background:#f5f7fb;
+  color:#172033;
+}
+
+button,input,select,textarea{
+  font-family:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.app{
+  min-height:100vh;
+  display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:250px;
+  background:#0f2f5f;
+  color:white;
+  position:fixed;
+  top:0;
+  right:0;
+  bottom:0;
+  z-index:100;
+  overflow-y:auto;
+}
+
+.logo{
+  padding:25px 20px;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.logo h1{
+  font-size:25px;
+  margin-bottom:6px;
+}
+
+.logo p{
+  font-size:12px;
+  opacity:.7;
+}
+
+.nav{
+  padding:15px 10px;
+}
+
+.nav button{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:white;
+  text-align:right;
+  padding:13px 15px;
+  margin-bottom:5px;
+  border-radius:10px;
+  font-size:15px;
+}
+
+.nav button:hover,
+.nav button.active{
+  background:#174982;
+}
+
+/* MAIN */
+.main{
+  width:calc(100% - 250px);
+  margin-right:250px;
+  padding:25px;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:25px;
+  gap:15px;
+}
+
+.topbar h2{
+  font-size:25px;
+}
+
+.mobile-menu{
+  display:none;
+}
+
+/* CARDS */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  margin-bottom:25px;
+}
+
+.card{
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  box-shadow:0 3px 15px rgba(0,0,0,.05);
+}
+
+.card-title{
+  color:#718096;
+  font-size:14px;
+  margin-bottom:10px;
+}
+
+.card-value{
+  font-size:25px;
+  font-weight:bold;
+}
+
+.card small{
+  display:block;
+  margin-top:7px;
+  color:#718096;
+}
+
+/* PANELS */
+.panel{
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 3px 15px rgba(0,0,0,.05);
+}
+
+.panel-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.panel-head h2{
+  font-size:19px;
+}
+
+/* BUTTONS */
+.btn{
+  border:0;
+  border-radius:9px;
+  padding:10px 16px;
+  font-size:14px;
+}
+
+.btn-primary{
+  background:#1261a0;
+  color:white;
+}
+
+.btn-success{
+  background:#198754;
+  color:white;
+}
+
+.btn-danger{
+  background:#dc3545;
+  color:white;
+}
+
+.btn-secondary{
+  background:#e9eef5;
+  color:#26364d;
+}
+
+.btn-warning{
+  background:#f0ad00;
+  color:white;
+}
+
+/* FORMS */
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+.field label{
+  font-size:14px;
+  font-weight:bold;
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  border:1px solid #d8e0eb;
+  border-radius:9px;
+  padding:11px;
+  outline:none;
+  background:white;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color:#1261a0;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+/* TABLE */
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+}
+
+th,td{
+  padding:12px;
+  border-bottom:1px solid #edf0f5;
+  text-align:right;
+  font-size:14px;
+}
+
+th{
+  background:#f8fafc;
+  color:#526174;
+}
+
+.empty{
+  text-align:center;
+  color:#8793a3;
+  padding:30px;
+}
+
+/* BADGES */
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+}
+
+.badge-green{
+  background:#dff5e8;
+  color:#137a3d;
+}
+
+.badge-red{
+  background:#fde2e4;
+  color:#b42332;
+}
+
+.badge-yellow{
+  background:#fff1cc;
+  color:#8a6200;
+}
+
+/* ACTIONS */
+.actions{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+}
+
+.actions button{
+  padding:7px 10px;
+  border:0;
+  border-radius:7px;
+  font-size:12px;
+}
+
+/* PRODUCT GRID */
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+
+.product-card{
+  border:1px solid #e4e9f0;
+  border-radius:12px;
+  padding:15px;
+}
+
+.product-card h3{
+  margin-bottom:8px;
+}
+
+.product-meta{
+  color:#667085;
+  font-size:13px;
+  line-height:1.8;
+}
+
+/* SEARCH */
+.search-row{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.search-row input,
+.search-row select{
+  padding:11px;
+  border:1px solid #d8e0eb;
+  border-radius:9px;
+  outline:none;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:500;
+  padding:20px;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  background:white;
+  width:min(800px,100%);
+  max-height:90vh;
+  overflow-y:auto;
+  border-radius:15px;
+  padding:25px;
+}
+
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+
+.close{
+  border:0;
+  background:#eee;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  background:#172033;
+  color:white;
+  padding:13px 18px;
+  border-radius:10px;
+  display:none;
+  z-index:1000;
+  box-shadow:0 5px 20px rgba(0,0,0,.2);
+}
+
+.toast.show{
+  display:block;
+}
+
+/* HIDDEN */
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+/* RESPONSIVE */
+@media(max-width:1000px){
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .product-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:700px){
+
+  .sidebar{
+    transform:translateX(100%);
+    transition:.25s;
+  }
+
+  .sidebar.open{
+    transform:translateX(0);
+  }
+
+  .main{
+    width:100%;
+    margin-right:0;
+    padding:15px;
+  }
+
+  .mobile-menu{
+    display:block;
+    border:0;
+    background:#0f2f5f;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+  }
+
+  .topbar h2{
+    font-size:20px;
+  }
+
+  .cards{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .card{
+    padding:14px;
+  }
+
+  .card-value{
+    font-size:20px;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .product-grid{
+    grid-template-columns:1fr;
+  }
+
+  .search-row{
+    flex-direction:column;
+  }
+}
 </style>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
-<div class="layout">
-<aside class="sidebar">
- <div class="brand"><div class="logo">M MAKKAOUI</div><small>MANAGEMENT · تسيير المحل</small></div>
- <button class="nav active" data-page="dashboard"><span>▦</span><b class="nav-label">لوحة التحكم</b></button>
- <button class="nav" data-page="sales"><span>🛒</span><b class="nav-label">المبيعات</b></button>
- <button class="nav" data-page="stock"><span>📦</span><b class="nav-label">المخزون</b></button>
- <button class="nav" data-page="expenses"><span>💸</span><b class="nav-label">المصاريف</b></button>
- <button class="nav" data-page="customers"><span>👥</span><b class="nav-label">الزبناء والديون</b></button>
- <button class="nav" data-page="suppliers"><span>🚚</span><b class="nav-label">الموردون</b></button>
- <button class="nav" data-page="reports"><span>📊</span><b class="nav-label">التقارير</b></button>
- <button class="nav" data-page="backup"><span>⚙️</span><b class="nav-label">الإعدادات والنسخ</b></button>
- <div class="foot">Makkaoui Clothes<br>معك في كل خطوة</div>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+  <div class="logo">
+    <h1>Makkaoui</h1>
+    <p>Management</p>
+  </div>
+
+  <div class="nav">
+
+    <button class="active" onclick="showPage('dashboard',this)">
+      🏠 لوحة التحكم
+    </button>
+
+    <button onclick="showPage('sales',this)">
+      🛒 المبيعات
+    </button>
+
+    <button onclick="showPage('products',this)">
+      📦 المنتجات والمخزون
+    </button>
+
+    <button onclick="showPage('expenses',this)">
+      💸 المصاريف
+    </button>
+
+    <button onclick="showPage('customers',this)">
+      👥 الزبناء والديون
+    </button>
+
+    <button onclick="showPage('suppliers',this)">
+      🚚 الموردون
+    </button>
+
+    <button onclick="showPage('reports',this)">
+      📊 التقارير
+    </button>
+
+    <button onclick="showPage('settings',this)">
+      ⚙️ الإعدادات
+    </button>
+
+  </div>
 </aside>
-<main>
- <header class="topbar"><div><strong id="shopTitle">Makkaoui Clothes</strong><div class="small">نظام تسيير المحل</div></div><div class="top-actions"><span class="small" id="todayText"></span><button class="secondary" id="quickSaleTop">＋ بيع جديد</button></div></header>
- <div class="content">
-  <section class="page active" id="page-dashboard">
-   <div class="heading"><div><h1>لوحة التحكم</h1><p>نظرة عامة على وضعية المحل والمبيعات والمصاريف.</p></div><div class="filters"><select id="dashPeriod" class="search"><option value="month">هذا الشهر</option><option value="today">اليوم</option><option value="all">من البداية</option></select></div></div>
-   <div class="cards">
-    <div class="metric blue"><div class="label">مجموع المبيعات</div><div class="value" id="mSales">0 DH</div><div class="note">قيمة عمليات البيع المسجلة</div></div>
-    <div class="metric green"><div class="label">الربح الإجمالي</div><div class="value" id="mGross">0 DH</div><div class="note">المبيعات ناقص تكلفة السلع المباعة</div></div>
-    <div class="metric orange"><div class="label">مجموع المصاريف</div><div class="value" id="mExpenses">0 DH</div><div class="note">مصاريف التشغيل المسجلة</div></div>
-    <div class="metric purple"><div class="label">صافي الربح التقديري</div><div class="value" id="mNet">0 DH</div><div class="note">الربح الإجمالي ناقص المصاريف</div></div>
-    <div class="metric"><div class="label">الفلوس المحصلة</div><div class="value" id="mCollected">0 DH</div><div class="note">المبالغ المقبوضة من المبيعات</div></div>
-    <div class="metric"><div class="label">ديون الزبناء</div><div class="value" id="mDebts">0 DH</div><div class="note">المبالغ المتبقية عند الزبناء</div></div>
-    <div class="metric"><div class="label">قيمة المخزون الحالية</div><div class="value" id="mStock">0 DH</div><div class="note">حسب تكلفة الشراء المسجلة</div></div>
-    <div class="metric"><div class="label">عدد عمليات البيع</div><div class="value" id="mCount">0</div><div class="note">عدد الفواتير المسجلة</div></div>
-   </div>
-   <div class="panel"><div class="panel-head"><h2>إجراءات سريعة</h2><span class="muted">سجل عملياتك أولاً بأول</span></div><div class="quick-actions">
-    <button data-goto="sales"><span>🛒</span>تسجيل عملية بيع</button><button class="secondary" data-goto="stock"><span>📦</span>إضافة منتوج</button><button class="secondary" data-goto="expenses"><span>💸</span>تسجيل مصروف</button><button class="secondary" data-goto="customers"><span>👥</span>إضافة زبون / أداء دين</button>
-   </div></div>
-   <div class="grid2"><div class="panel"><div class="panel-head"><h2>آخر المبيعات</h2><button class="ghost small-btn" data-goto="sales">عرض الكل</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>المنتوج</th><th>المبلغ</th><th>الربح</th></tr></thead><tbody id="recentSales"></tbody></table></div></div>
-   <div class="panel"><div class="panel-head"><h2>المخزون القليل</h2><button class="ghost small-btn" data-goto="stock">عرض المخزون</button></div><div class="table-wrap"><table><thead><tr><th>المنتوج</th><th>المقاس</th><th>الكمية</th></tr></thead><tbody id="lowStock"></tbody></table></div></div></div>
-   <div class="footer-note">تنبيه: النتائج تقديرية وتعتمد على البيانات التي تدخلها. لا تعتبر مشتريات المخزون غير المباع مصروفاً تشغيلياً عند حساب الربح؛ تُحتسب تكلفة السلعة عند بيعها. هذه النسخة تحفظ البيانات في المتصفح الحالي فقط، لذلك استعمل النسخ الاحتياطي بانتظام.</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="topbar">
+    <div>
+      <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+    </div>
+
+    <div>
+      <h2 id="pageTitle">لوحة التحكم</h2>
+    </div>
+  </div>
+
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="page active">
+
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-title">إجمالي المبيعات</div>
+        <div class="card-value" id="dashSales">0 DH</div>
+        <small>إجمالي قيمة المبيعات</small>
+      </div>
+
+      <div class="card">
+        <div class="card-title">الربح الإجمالي</div>
+        <div class="card-value" id="dashGross">0 DH</div>
+        <small>المبيعات ناقص تكلفة السلع</small>
+      </div>
+
+      <div class="card">
+        <div class="card-title">المصاريف</div>
+        <div class="card-value" id="dashExpenses">0 DH</div>
+        <small>مصاريف المحل</small>
+      </div>
+
+      <div class="card">
+        <div class="card-title">الربح الصافي</div>
+        <div class="card-value" id="dashNet">0 DH</div>
+        <small>الربح بعد المصاريف</small>
+      </div>
+
+      <div class="card">
+        <div class="card-title">المبلغ المحصل</div>
+        <div class="card-value" id="dashCollected">0 DH</div>
+        <small>الفلوس اللي تخلصات</small>
+      </div>
+
+      <div class="card">
+        <div class="card-title">ديون الزبناء</div>
+        <div class="card-value" id="dashDebt">0 DH</div>
+        <small>المبالغ المتبقية</small>
+      </div>
+
+      <div class="card">
+        <div class="card-title">قيمة المخزون</div>
+        <div class="card-value" id="dashStock">0 DH</div>
+        <small>حسب تكلفة الشراء</small>
+      </div>
+
+      <div class="card">
+        <div class="card-title">عدد المبيعات</div>
+        <div class="card-value" id="dashCount">0</div>
+        <small>عدد العمليات</small>
+      </div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>آخر المبيعات</h2>
+
+        <button class="btn btn-primary"
+                onclick="showPageByName('sales')">
+          عرض جميع المبيعات
+        </button>
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>الزبون</th>
+              <th>المبلغ</th>
+              <th>المؤدى</th>
+              <th>الباقي</th>
+            </tr>
+          </thead>
+
+          <tbody id="recentSales"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
   </section>
-  <section class="page" id="page-sales">
-   <div class="heading"><div><h1>المبيعات</h1><p>سجل المبيعات، الأداء، وتكلفة السلع المباعة.</p></div></div>
-   <div class="panel"><div class="panel-head"><h2>تسجيل عملية بيع</h2></div>
-    <form id="saleForm"><div class="form-grid">
-     <div class="field"><label>المنتوج</label><select id="saleProduct" required></select></div>
-     <div class="field"><label>الكمية</label><input id="saleQty" type="number" min="1" step="1" value="1" required></div>
-     <div class="field"><label>ثمن البيع للوحدة (DH)</label><input id="salePrice" type="number" min="0" step="0.01" required></div>
-     <div class="field"><label>المبلغ المؤدى (DH)</label><input id="salePaid" type="number" min="0" step="0.01" required></div>
-     <div class="field"><label>طريقة الأداء</label><select id="saleMethod"><option>نقداً</option><option>تحويل بنكي</option><option>بطاقة بنكية</option><option>توصيل / نقد عند التسليم</option><option>جزئي / دين</option></select></div>
-     <div class="field"><label>اسم الزبون (اختياري)</label><input id="saleCustomer" placeholder="اسم الزبون"></div>
-     <div class="field"><label>قناة البيع</label><select id="saleChannel"><option>المحل</option><option>أونلاين</option><option>توصيل</option></select></div>
-     <div class="field"><label>تاريخ البيع</label><input id="saleDate" type="date" required></div>
-     <div class="field"><label>ملاحظات</label><input id="saleNotes" placeholder="اختياري"></div>
-    </div><div class="form-actions"><button type="submit">حفظ عملية البيع</button><button type="reset" class="ghost">مسح الخانات</button></div></form>
-   </div>
-   <div class="panel"><div class="panel-head"><h2>سجل المبيعات</h2></div><div class="toolbar"><input class="search" id="salesSearch" placeholder="بحث باسم المنتوج أو الزبون"><button class="secondary" id="exportSales">تصدير CSV</button></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>المنتوج</th><th>الكمية</th><th>المجموع</th><th>التكلفة</th><th>الربح</th><th>المؤدى</th><th>المتبقي</th><th>الزبون</th><th>إجراء</th></tr></thead><tbody id="salesRows"></tbody></table></div></div>
+
+
+  <!-- SALES -->
+  <section id="sales" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>إضافة عملية بيع</h2>
+      </div>
+
+      <form id="saleForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>الزبون</label>
+            <input id="saleCustomer"
+                   placeholder="اسم الزبون">
+          </div>
+
+          <div class="field">
+            <label>طريقة الأداء</label>
+
+            <select id="salePaymentMethod">
+              <option value="cash">نقداً</option>
+              <option value="transfer">تحويل بنكي</option>
+              <option value="card">بطاقة</option>
+              <option value="credit">دين</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>المنتوج</label>
+
+            <select id="saleProduct">
+              <option value="">اختار المنتوج</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>الكمية</label>
+
+            <input id="saleQty"
+                   type="number"
+                   min="1"
+                   value="1">
+          </div>
+
+          <div class="field">
+            <label>ثمن البيع للوحدة</label>
+
+            <input id="salePrice"
+                   type="number"
+                   step="0.01"
+                   min="0">
+          </div>
+
+          <div class="field">
+            <label>المبلغ المؤدى</label>
+
+            <input id="salePaid"
+                   type="number"
+                   step="0.01"
+                   min="0"
+                   value="0">
+          </div>
+
+          <div class="field full">
+            <label>ملاحظات</label>
+
+            <textarea id="saleNotes"></textarea>
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-success" type="submit">
+          تسجيل البيع
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>المبيعات</h2>
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>الزبون</th>
+              <th>المنتوج</th>
+              <th>الكمية</th>
+              <th>الإجمالي</th>
+              <th>المؤدى</th>
+              <th>الباقي</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+
+          <tbody id="salesTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
   </section>
-  <section class="page" id="page-stock">
-   <div class="heading"><div><h1>المخزون والمنتوجات</h1><p>أضف السلع وتتبع الكميات والمقاسات والألوان.</p></div></div>
-   <div class="panel"><div class="panel-head"><h2 id="productFormTitle">إضافة منتوج جديد</h2></div>
-    <form id="productForm"><input type="hidden" id="productId"><div class="form-grid">
-     <div class="field"><label>اسم المنتوج *</label><input id="pName" required placeholder="مثال: سروال كلاس"></div>
-     <div class="field"><label>الصنف</label><select id="pCategory"><option>سراويل</option><option>تيشورتات</option><option>قمصان</option><option>سبرديلات</option><option>جاكيتات</option><option>أخرى</option></select></div>
-     <div class="field"><label>كود المنتوج / SKU</label><input id="pSku" placeholder="اختياري"></div>
-     <div class="field"><label>المقاس</label><input id="pSize" placeholder="S / M / L / 42..."></div>
-     <div class="field"><label>اللون</label><input id="pColor" placeholder="أسود، أبيض..."></div>
-     <div class="field"><label>ثمن الشراء للوحدة (DH) *</label><input id="pCost" type="number" min="0" step=".01" required></div>
-     <div class="field"><label>ثمن البيع للوحدة (DH) *</label><input id="pPrice" type="number" min="0" step=".01" required></div>
-     <div class="field"><label>الكمية المتوفرة *</label><input id="pQty" type="number" min="0" step="1" required></div>
-     <div class="field"><label>حد التنبيه للمخزون</label><input id="pMin" type="number" min="0" step="1" value="3"></div>
-    </div><div class="form-actions"><button type="submit" id="saveProductBtn">حفظ المنتوج</button><button type="button" class="ghost" id="cancelProductEdit" style="display:none">إلغاء التعديل</button></div></form>
-   </div>
-   <div class="panel"><div class="panel-head"><h2>قائمة المنتوجات</h2><span class="muted" id="stockCount"></span></div><div class="toolbar"><input class="search" id="stockSearch" placeholder="بحث باسم المنتوج أو الكود"></div><div class="table-wrap"><table><thead><tr><th>المنتوج</th><th>الصنف</th><th>المقاس / اللون</th><th>ثمن الشراء</th><th>ثمن البيع</th><th>الكمية</th><th>قيمة المخزون</th><th>إجراء</th></tr></thead><tbody id="stockRows"></tbody></table></div></div>
+
+
+  <!-- PRODUCTS -->
+  <section id="products" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+
+        <h2 id="productFormTitle">
+          إضافة منتوج جديد
+        </h2>
+
+      </div>
+
+      <form id="productForm">
+
+        <input type="hidden" id="productId">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>اسم المنتوج *</label>
+
+            <input id="pName"
+                   required
+                   placeholder="مثال: سروال كلاس">
+          </div>
+
+
+          <div class="field">
+
+            <label>الصنف *</label>
+
+            <select id="pCategory" required>
+
+              <option value="سراويل">سراويل</option>
+
+              <option value="تيشورتات">
+                تيشورتات
+              </option>
+
+              <option value="قمصان">
+                قمصان
+              </option>
+
+              <option value="سبرديلات">
+                سبرديلات
+              </option>
+
+              <option value="جاكيتات">
+                جاكيتات
+              </option>
+
+              <option value="أخرى">
+                أخرى
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>ثمن الشراء</label>
+
+            <input id="pCost"
+                   type="number"
+                   step="0.01"
+                   min="0"
+                   value="0">
+
+          </div>
+
+
+          <div class="field">
+
+            <label>ثمن البيع</label>
+
+            <input id="pPrice"
+                   type="number"
+                   step="0.01"
+                   min="0"
+                   value="0">
+
+          </div>
+
+
+          <div class="field">
+
+            <label>الكمية</label>
+
+            <input id="pQty"
+                   type="number"
+                   min="0"
+                   value="0">
+
+          </div>
+
+
+          <div class="field">
+
+            <label>الحد الأدنى للمخزون</label>
+
+            <input id="pMin"
+                   type="number"
+                   min="0"
+                   value="3">
+
+          </div>
+
+        </div>
+
+        <br>
+
+        <div class="actions">
+
+          <button class="btn btn-primary"
+                  type="submit">
+            حفظ المنتوج
+          </button>
+
+          <button class="btn btn-secondary"
+                  type="button"
+                  onclick="resetProductForm()">
+            إلغاء
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+
+        <h2>المخزون</h2>
+
+        <input id="productSearch"
+               placeholder="بحث عن منتوج..."
+               oninput="renderProducts()">
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>المنتوج</th>
+              <th>الصنف</th>
+              <th>الشراء</th>
+              <th>البيع</th>
+              <th>الكمية</th>
+              <th>قيمة المخزون</th>
+              <th>الحالة</th>
+              <th>إجراء</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="productsTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
   </section>
-  <section class="page" id="page-expenses">
-   <div class="heading"><div><h1>المصاريف</h1><p>سجل مصاريف المحل والإعلانات والنقل وغيرها.</p></div></div>
-   <div class="panel"><div class="panel-head"><h2>تسجيل مصروف</h2></div><form id="expenseForm"><div class="form-grid">
-    <div class="field"><label>نوع المصروف *</label><select id="eCategory"><option>الكراء</option><option>الإشهار</option><option>الماء والكهرباء</option><option>الإنترنت والهاتف</option><option>النقل والتوصيل</option><option>التغليف والأكياس</option><option>الأجور</option><option>الصيانة</option><option>مصاريف بنكية</option><option>أخرى</option></select></div>
-    <div class="field"><label>المبلغ (DH) *</label><input id="eAmount" type="number" min=".01" step=".01" required></div>
-    <div class="field"><label>التاريخ *</label><input id="eDate" type="date" required></div>
-    <div class="field"><label>طريقة الأداء</label><select id="eMethod"><option>نقداً</option><option>تحويل بنكي</option><option>بطاقة بنكية</option><option>أخرى</option></select></div>
-    <div class="field"><label>ملاحظات</label><input id="eNotes" placeholder="مثال: حملة إعلانية"></div>
-   </div><div class="form-actions"><button type="submit">حفظ المصروف</button></div></form></div>
-   <div class="panel"><div class="panel-head"><h2>سجل المصاريف</h2><button class="secondary" id="exportExpenses">تصدير CSV</button></div><div class="toolbar"><input class="search" id="expenseSearch" placeholder="بحث في المصاريف"></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>التصنيف</th><th>المبلغ</th><th>طريقة الأداء</th><th>ملاحظات</th><th>إجراء</th></tr></thead><tbody id="expenseRows"></tbody></table></div></div>
+
+
+  <!-- EXPENSES -->
+  <section id="expenses" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>إضافة مصروف</h2>
+      </div>
+
+      <form id="expenseForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>نوع المصروف</label>
+
+            <input id="expenseName"
+                   required
+                   placeholder="مثال: إعلانات">
+          </div>
+
+          <div class="field">
+            <label>المبلغ</label>
+
+            <input id="expenseAmount"
+                   type="number"
+                   step="0.01"
+                   min="0"
+                   required>
+          </div>
+
+          <div class="field full">
+            <label>ملاحظات</label>
+
+            <textarea id="expenseNotes"></textarea>
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-success">
+          تسجيل المصروف
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>المصاريف</h2>
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>المصروف</th>
+              <th>المبلغ</th>
+              <th>ملاحظات</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+
+          <tbody id="expensesTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
   </section>
-  <section class="page" id="page-customers">
-   <div class="heading"><div><h1>الزبناء والديون</h1><p>تتبع المبالغ المتبقية وتسجيل الأداءات.</p></div></div>
-   <div class="panel"><div class="panel-head"><h2>تسجيل أداء دين زبون</h2></div><form id="paymentForm"><div class="form-grid">
-    <div class="field"><label>اختيار عملية البيع غير المؤداة كلياً</label><select id="debtSale" required></select></div>
-    <div class="field"><label>المبلغ المؤدى الآن (DH)</label><input id="debtAmount" type="number" min=".01" step=".01" required></div>
-    <div class="field"><label>تاريخ الأداء</label><input id="debtDate" type="date" required></div>
-   </div><div class="form-actions"><button type="submit">تسجيل الأداء</button></div></form></div>
-   <div class="panel"><div class="panel-head"><h2>الديون المتبقية عند الزبناء</h2></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>الزبون</th><th>المنتوج</th><th>المجموع</th><th>المؤدى</th><th>المتبقي</th></tr></thead><tbody id="debtsRows"></tbody></table></div></div>
-   <div class="panel"><div class="panel-head"><h2>أسماء الزبناء</h2></div><form id="customerForm"><div class="form-grid"><div class="field"><label>اسم الزبون</label><input id="cName" required></div><div class="field"><label>الهاتف (اختياري)</label><input id="cPhone" type="tel"></div><div class="field"><label>ملاحظات</label><input id="cNotes"></div></div><div class="form-actions"><button type="submit">إضافة زبون</button></div></form><div class="table-wrap" style="margin-top:15px"><table><thead><tr><th>الاسم</th><th>الهاتف</th><th>ملاحظات</th><th>إجراء</th></tr></thead><tbody id="customerRows"></tbody></table></div></div>
+
+
+  <!-- CUSTOMERS -->
+  <section id="customers" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>الزبناء والديون</h2>
+      </div>
+
+      <form id="customerForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>اسم الزبون</label>
+
+            <input id="customerName"
+                   required>
+          </div>
+
+          <div class="field">
+            <label>الهاتف</label>
+
+            <input id="customerPhone">
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-success">
+          إضافة الزبون
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>الزبون</th>
+              <th>الهاتف</th>
+              <th>المبيعات</th>
+              <th>الأداء</th>
+              <th>الدين</th>
+              <th>إجراء</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="customersTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
   </section>
-  <section class="page" id="page-suppliers">
-   <div class="heading"><div><h1>الموردون</h1><p>حفظ معلومات الموردين وتتبع المبالغ المستحقة لهم.</p></div></div>
-   <div class="panel"><div class="panel-head"><h2>إضافة مورد</h2></div><form id="supplierForm"><div class="form-grid"><div class="field"><label>اسم المورد *</label><input id="supName" required></div><div class="field"><label>الهاتف</label><input id="supPhone" type="tel"></div><div class="field"><label>المبلغ المستحق (DH)</label><input id="supDebt" type="number" min="0" step=".01" value="0"></div><div class="field"><label>ملاحظات</label><input id="supNotes"></div></div><div class="form-actions"><button type="submit">حفظ المورد</button></div></form></div>
-   <div class="panel"><div class="panel-head"><h2>قائمة الموردين</h2></div><div class="table-wrap"><table><thead><tr><th>المورد</th><th>الهاتف</th><th>المستحق</th><th>ملاحظات</th><th>إجراء</th></tr></thead><tbody id="supplierRows"></tbody></table></div></div>
-   <div class="notice">لتفادي احتساب السلعة مرتين، إدخال المورد هنا يحفظ بياناته ومستحقاته فقط ولا يضيف تلقائياً مشتريات إلى المخزون أو المصاريف. يمكن تطوير دفتر المشتريات في مرحلة لاحقة.</div>
+
+
+  <!-- SUPPLIERS -->
+  <section id="suppliers" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>إضافة مورد</h2>
+      </div>
+
+      <form id="supplierForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>اسم المورد</label>
+
+            <input id="supplierName"
+                   required>
+          </div>
+
+          <div class="field">
+            <label>الهاتف</label>
+
+            <input id="supplierPhone">
+          </div>
+
+          <div class="field full">
+            <label>ملاحظات</label>
+
+            <textarea id="supplierNotes"></textarea>
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-success">
+          إضافة المورد
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>المورد</th>
+              <th>الهاتف</th>
+              <th>ملاحظات</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+
+          <tbody id="suppliersTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
   </section>
-  <section class="page" id="page-reports">
-   <div class="heading"><div><h1>التقارير</h1><p>راجع النتائج المالية خلال فترة تختارها.</p></div></div>
-   <div class="panel"><div class="panel-head"><h2>تقرير حسب الفترة</h2></div><div class="form-grid"><div class="field"><label>من تاريخ</label><input type="date" id="reportFrom"></div><div class="field"><label>إلى تاريخ</label><input type="date" id="reportTo"></div><div class="field" style="justify-content:end"><button id="runReport" type="button">إنشاء التقرير</button></div></div></div>
-   <div class="cards">
-    <div class="metric blue"><div class="label">المبيعات</div><div class="value" id="rSales">0 DH</div></div>
-    <div class="metric green"><div class="label">تكلفة السلع المباعة</div><div class="value" id="rCost">0 DH</div></div>
-    <div class="metric orange"><div class="label">الربح الإجمالي</div><div class="value" id="rGross">0 DH</div></div>
-    <div class="metric purple"><div class="label">صافي الربح التقديري</div><div class="value" id="rNet">0 DH</div></div>
-   </div><div class="panel"><div class="panel-head"><h2>ملخص التقرير</h2></div><div id="reportSummary" class="muted">اختار الفترة واضغط على إنشاء التقرير.</div><div class="form-actions"><button class="secondary" id="exportAll">تصدير جميع البيانات CSV</button></div></div>
+
+
+  <!-- REPORTS -->
+  <section id="reports" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>التقارير المالية</h2>
+      </div>
+
+      <div class="cards">
+
+        <div class="card">
+          <div class="card-title">
+            المبيعات
+          </div>
+
+          <div class="card-value"
+               id="reportSales">
+            0 DH
+          </div>
+        </div>
+
+
+        <div class="card">
+          <div class="card-title">
+            تكلفة البضاعة
+          </div>
+
+          <div class="card-value"
+               id="reportCost">
+            0 DH
+          </div>
+        </div>
+
+
+        <div class="card">
+          <div class="card-title">
+            الربح الإجمالي
+          </div>
+
+          <div class="card-value"
+               id="reportGross">
+            0 DH
+          </div>
+        </div>
+
+
+        <div class="card">
+          <div class="card-title">
+            الربح الصافي
+          </div>
+
+          <div class="card-value"
+               id="reportNet">
+            0 DH
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>ملخص المخزون</h2>
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>المنتوج</th>
+              <th>الكمية</th>
+              <th>قيمة الشراء</th>
+              <th>قيمة البيع</th>
+              <th>الربح المحتمل</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="reportStock"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
   </section>
-  <section class="page" id="page-backup">
-   <div class="heading"><div><h1>الإعدادات والنسخ الاحتياطي</h1><p>حافظ على بياناتك وقم بتصديرها عند الحاجة.</p></div></div>
-   <div class="panel"><div class="panel-head"><h2>معلومات المحل</h2></div><form id="settingsForm"><div class="form-grid"><div class="field"><label>اسم المحل</label><input id="setShop" value="Makkaoui Clothes"></div><div class="field"><label>اسم المسير</label><input id="setManager" placeholder="اسمك"></div><div class="field"><label>تنبيه المخزون الافتراضي</label><input id="setMin" type="number" min="0" value="3"></div></div><div class="form-actions"><button type="submit">حفظ الإعدادات</button></div></form></div>
-   <div class="panel"><div class="panel-head"><h2>نسخ احتياطي واسترجاع</h2></div><p class="muted">النسخة الحالية تخزن البيانات في المتصفح على هذا الجهاز. نزّل نسخة احتياطية بانتظام، خصوصاً قبل تغيير الجهاز أو تنظيف بيانات المتصفح.</p><div class="form-actions"><button id="backupBtn">تنزيل نسخة احتياطية JSON</button><label class="ghost" style="padding:10px 14px;border-radius:10px;cursor:pointer">استرجاع نسخة JSON<input id="restoreFile" type="file" accept=".json,application/json" hidden></label><button class="danger" id="clearData">مسح جميع البيانات</button></div><div class="footer-note">مهم: هذه النسخة لا تزامن البيانات بين الأجهزة تلقائياً ولا تحتوي بعد على حسابات مستخدمين أو استضافة سحابية. لا تسجل معلومات حساسة للزبناء. سنحتاج إلى استضافة وقاعدة بيانات آمنة إذا أردت استخداماً متزامناً من الهاتف والحاسوب.</div></div>
+
+
+  <!-- SETTINGS -->
+  <section id="settings" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>إعدادات المحل</h2>
+      </div>
+
+      <form id="settingsForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>اسم المحل</label>
+
+            <input id="shopName">
+          </div>
+
+          <div class="field">
+            <label>اسم المسؤول</label>
+
+            <input id="managerName">
+          </div>
+
+          <div class="field">
+            <label>الحد الأدنى الافتراضي للمخزون</label>
+
+            <input id="minStock"
+                   type="number"
+                   min="0">
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-primary">
+          حفظ الإعدادات
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>النسخ الاحتياطي</h2>
+      </div>
+
+      <div class="actions">
+
+        <button class="btn btn-success"
+                onclick="exportBackup()">
+          تحميل نسخة احتياطية
+        </button>
+
+        <button class="btn btn-secondary"
+                onclick="document.getElementById('backupFile').click()">
+          استرجاع نسخة
+        </button>
+
+        <input type="file"
+               id="backupFile"
+               accept=".json"
+               style="display:none"
+               onchange="importBackup(event)">
+
+      </div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>المزامنة السحابية</h2>
+      </div>
+
+      <p style="line-height:2;color:#667085">
+        البيانات كتتحفظ محلياً فالمتصفح، وكتتم محاولة مزامنتها
+        كذلك مع Supabase.
+      </p>
+
+      <br>
+
+      <button class="btn btn-primary"
+              onclick="loadCloudDB(true)">
+        ☁️ مزامنة الآن
+      </button>
+
+    </div>
+
   </section>
- </div>
+
 </main>
+
 </div>
-<div id="toast" style="position:fixed;bottom:20px;left:20px;z-index:20;background:#10294b;color:white;padding:12px 18px;border-radius:10px;display:none;box-shadow:0 8px 25px #0002"></div>
+
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+
 <script>
-const KEY='makkaoui_management_v1';
- const SUPABASE_URL='https://lxidsrwfwxrbdqyyjezd.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='YOUR_PUBLISHABLE_KEY';
 
-const supabaseClient=window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
-const blank=()=>({products:[],sales:[],expenses:[],customers:[],suppliers:[],payments:[],settings:{shop:'Makkaoui Clothes',manager:'',minStock:3}});
-let db=loadDB();
-function loadDB(){try{return Object.assign(blank(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){return blank()}}
-async function saveDB(){
-  localStorage.setItem(KEY,JSON.stringify(db));
-  renderAll();async function loadCloudDB(){
-  try{
-    const {data,error}=await supabaseClient
-      .from('app_state')
-      .select('data')
-      .eq('id',1)
-      .maybeSingle();
+/* =========================================================
+   SUPABASE
+========================================================= */
 
-    if(error) throw error;
+const SUPABASE_URL =
+'https://lxidsrwfwxrbdqyyjezd.supabase.co';
 
-    if(data && data.data){
-      db=Object.assign(blank(),data.data);
+/*
+  مهم:
+  بدّل YOUR_PUBLISHABLE_KEY بالمفتاح Publishable key
+  من Supabase.
+*/
+const SUPABASE_PUBLISHABLE_KEY =
+'sb_publishable_NzoLeXzSFHerv3Ehmz_B-A_clNpchjh';
 
-      localStorage.setItem(
-        KEY,
-        JSON.stringify(db)
+
+let supabaseClient = null;
+
+try{
+
+  if(
+    window.supabase &&
+    SUPABASE_PUBLISHABLE_KEY !== 'YOUR_PUBLISHABLE_KEY'
+  ){
+
+    supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
       );
 
-      renderAll();
+  }
 
-      toast('تمت مزامنة البيانات مع السحابة ☁️');
-    }else{
+}catch(error){
+
+  console.error(
+    'Supabase initialization error:',
+    error
+  );
+
+}
+
+
+/* =========================================================
+   LOCAL DATABASE
+========================================================= */
+
+const KEY =
+'makkaoui_management_v2';
+
+
+function blank(){
+
+  return {
+
+    products:[],
+
+    sales:[],
+
+    expenses:[],
+
+    customers:[],
+
+    suppliers:[],
+
+    payments:[],
+
+    settings:{
+      shop:'Makkaoui Clothes',
+      manager:'',
+      minStock:3
+    }
+
+  };
+
+}
+
+
+function loadDB(){
+
+  try{
+
+    const saved =
+      JSON.parse(
+        localStorage.getItem(KEY) || '{}'
+      );
+
+    return Object.assign(
+      blank(),
+      saved
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    return blank();
+
+  }
+
+}
+
+
+let db = loadDB();
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function id(){
+
+  return Date.now().toString(36)
+    +
+    Math.random()
+      .toString(36)
+      .slice(2,8);
+
+}
+
+
+function money(value){
+
+  return Number(value || 0)
+    .toLocaleString(
+      'fr-MA',
+      {
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+      }
+    )
+    +
+    ' DH';
+
+}
+
+
+function number(value){
+
+  return Number(value || 0);
+
+}
+
+
+function dateNow(){
+
+  return new Date().toISOString();
+
+}
+
+
+function formatDate(value){
+
+  if(!value) return '';
+
+  const d =
+    new Date(value);
+
+  return d.toLocaleDateString(
+    'fr-MA'
+  );
+
+}
+
+
+function escapeHtml(value){
+
+  return String(value ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+
+}
+
+
+function toast(message){
+
+  const el =
+    document.getElementById('toast');
+
+  el.textContent =
+    message;
+
+  el.classList.add('show');
+
+  clearTimeout(
+    window.toastTimer
+  );
+
+  window.toastTimer =
+    setTimeout(
+      ()=>{
+        el.classList.remove('show');
+      },
+      3000
+    );
+
+}
+
+
+/* =========================================================
+   SAVE LOCAL + CLOUD
+========================================================= */
+
+async function saveDB(){
+
+  /*
+    أولاً نحفظ محلياً دائماً
+  */
+
+  localStorage.setItem(
+    KEY,
+    JSON.stringify(db)
+  );
+
+  renderAll();
+
+
+  /*
+    من بعد نحاول Cloud
+  */
+
+  if(!supabaseClient){
+
+    console.log(
+      'Supabase غير مفعّل حالياً'
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    const {
+      error
+    } =
       await supabaseClient
         .from('app_state')
         .upsert({
@@ -181,97 +1600,2252 @@ async function saveDB(){
           updated_at:new Date().toISOString()
         });
 
-      console.log('Cloud database initialized');
-    }
 
-  }catch(e){
-    console.error('Cloud load error:',e);
-    toast('خدام محلياً — تعذر الاتصال بالسحابة');
+    if(error)
+      throw error;
+
+
+    console.log(
+      'Cloud sync: OK'
+    );
+
+
+  }catch(error){
+
+    console.error(
+      'Cloud sync error:',
+      error
+    );
+
+    toast(
+      'تحفظات محلياً، ولكن Cloud ما تخدماتش'
+    );
+
   }
+
 }
 
-loadCloudDB();
+
+/* =========================================================
+   LOAD CLOUD DATABASE
+========================================================= */
+
+async function loadCloudDB(showMessage=false){
+
+  if(!supabaseClient){
+
+    if(showMessage){
+
+      toast(
+        'دخل Publishable key ديال Supabase أولاً'
+      );
+
+    }
+
+    return;
+
+  }
+
 
   try{
-    const {error}=await supabaseClient
-      .from('app_state')
-      .upsert({
-        id:1,
-        data:db,
-        updated_at:new Date().toISOString()
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from('app_state')
+        .select('data')
+        .eq('id',1)
+        .maybeSingle();
+
+
+    if(error)
+      throw error;
+
+
+    if(
+      data &&
+      data.data
+    ){
+
+      db =
+        Object.assign(
+          blank(),
+          data.data
+        );
+
+
+      localStorage.setItem(
+        KEY,
+        JSON.stringify(db)
+      );
+
+
+      renderAll();
+
+
+      if(showMessage){
+
+        toast(
+          'تمت المزامنة مع السحابة ☁️'
+        );
+
+      }
+
+    }else{
+
+      /*
+        إذا كانت قاعدة السحابة خاوية،
+        نرسل البيانات المحلية إليها.
+      */
+
+      await supabaseClient
+        .from('app_state')
+        .upsert({
+          id:1,
+          data:db,
+          updated_at:new Date().toISOString()
+        });
+
+
+      console.log(
+        'Cloud database initialized'
+      );
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      'Cloud load error:',
+      error
+    );
+
+
+    if(showMessage){
+
+      toast(
+        'تعذر الاتصال بالسحابة'
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function showPage(page,button){
+
+  document
+    .querySelectorAll('.page')
+    .forEach(
+      p=>p.classList.remove('active')
+    );
+
+
+  const target =
+    document.getElementById(page);
+
+  if(target)
+    target.classList.add('active');
+
+
+  document
+    .querySelectorAll('.nav button')
+    .forEach(
+      b=>b.classList.remove('active')
+    );
+
+
+  if(button)
+    button.classList.add('active');
+
+
+  const titles = {
+
+    dashboard:'لوحة التحكم',
+
+    sales:'المبيعات',
+
+    products:'المنتجات والمخزون',
+
+    expenses:'المصاريف',
+
+    customers:'الزبناء والديون',
+
+    suppliers:'الموردون',
+
+    reports:'التقارير',
+
+    settings:'الإعدادات'
+
+  };
+
+
+  document.getElementById(
+    'pageTitle'
+  ).textContent =
+    titles[page] || 'Makkaoui Management';
+
+
+  renderAll();
+
+}
+
+
+function showPageByName(page){
+
+  const buttons =
+    document.querySelectorAll(
+      '.nav button'
+    );
+
+  let targetButton =
+    null;
+
+  buttons.forEach(
+    b=>{
+
+      if(
+        b.getAttribute('onclick')
+          ?.includes(
+            `'${page}'`
+          )
+      ){
+
+        targetButton=b;
+
+      }
+
+    }
+  );
+
+
+  showPage(
+    page,
+    targetButton
+  );
+
+}
+
+
+function toggleSidebar(){
+
+  document
+    .getElementById('sidebar')
+    .classList.toggle('open');
+
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function calculateStats(){
+
+  let sales = 0;
+
+  let cost = 0;
+
+  let paid = 0;
+
+
+  db.sales.forEach(
+    sale=>{
+
+      sales +=
+        number(sale.total);
+
+      paid +=
+        number(sale.paid);
+
+      cost +=
+        number(sale.cost);
+
+    }
+  );
+
+
+  let expenses = 0;
+
+  db.expenses.forEach(
+    e=>{
+      expenses +=
+        number(e.amount);
+    }
+  );
+
+
+  const gross =
+    sales - cost;
+
+  const net =
+    gross - expenses;
+
+  const debt =
+    sales - paid;
+
+
+  let stockValue = 0;
+
+  db.products.forEach(
+    p=>{
+
+      stockValue +=
+        number(p.qty)
+        *
+        number(p.cost);
+
+    }
+  );
+
+
+  return {
+
+    sales,
+
+    cost,
+
+    gross,
+
+    expenses,
+
+    net,
+
+    paid,
+
+    debt,
+
+    stockValue,
+
+    count:db.sales.length
+
+  };
+
+}
+
+
+function renderDashboard(){
+
+  const s =
+    calculateStats();
+
+
+  document.getElementById(
+    'dashSales'
+  ).textContent =
+    money(s.sales);
+
+
+  document.getElementById(
+    'dashGross'
+  ).textContent =
+    money(s.gross);
+
+
+  document.getElementById(
+    'dashExpenses'
+  ).textContent =
+    money(s.expenses);
+
+
+  document.getElementById(
+    'dashNet'
+  ).textContent =
+    money(s.net);
+
+
+  document.getElementById(
+    'dashCollected'
+  ).textContent =
+    money(s.paid);
+
+
+  document.getElementById(
+    'dashDebt'
+  ).textContent =
+    money(s.debt);
+
+
+  document.getElementById(
+    'dashStock'
+  ).textContent =
+    money(s.stockValue);
+
+
+  document.getElementById(
+    'dashCount'
+  ).textContent =
+    s.count;
+
+
+  const tbody =
+    document.getElementById(
+      'recentSales'
+    );
+
+
+  const sales =
+    [...db.sales]
+      .sort(
+        (a,b)=>
+          new Date(b.date)
+          -
+          new Date(a.date)
+      )
+      .slice(0,8);
+
+
+  if(!sales.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="5" class="empty">
+          لا توجد مبيعات بعد
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    sales.map(
+      sale=>{
+
+        const remaining =
+          number(sale.total)
+          -
+          number(sale.paid);
+
+
+        return `
+        <tr>
+
+          <td>
+            ${formatDate(sale.date)}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              sale.customer || 'زبون'
+            )}
+          </td>
+
+          <td>
+            ${money(sale.total)}
+          </td>
+
+          <td>
+            ${money(sale.paid)}
+          </td>
+
+          <td>
+            ${
+              remaining > 0
+              ?
+              `<span class="badge badge-red">
+                ${money(remaining)}
+              </span>`
+              :
+              `<span class="badge badge-green">
+                مؤدى
+              </span>`
+            }
+          </td>
+
+        </tr>
+        `;
+
+      }
+    ).join('');
+
+}
+
+
+/* =========================================================
+   PRODUCTS
+========================================================= */
+
+function renderProductSelect(){
+
+  const select =
+    document.getElementById(
+      'saleProduct'
+    );
+
+
+  const current =
+    select.value;
+
+
+  select.innerHTML =
+    `<option value="">
+      اختار المنتوج
+    </option>`
+    +
+    db.products.map(
+      p=>`
+        <option value="${p.id}">
+          ${escapeHtml(p.name)}
+          — ${money(p.price)}
+        </option>
+      `
+    ).join('');
+
+
+  if(
+    db.products.some(
+      p=>p.id===current
+    )
+  ){
+
+    select.value =
+      current;
+
+  }
+
+}
+
+
+function renderProducts(){
+
+  const tbody =
+    document.getElementById(
+      'productsTable'
+    );
+
+
+  const search =
+    (
+      document.getElementById(
+        'productSearch'
+      )?.value || ''
+    )
+    .trim()
+    .toLowerCase();
+
+
+  const products =
+    db.products.filter(
+      p=>
+        !search ||
+        String(p.name)
+          .toLowerCase()
+          .includes(search) ||
+        String(p.category)
+          .toLowerCase()
+          .includes(search)
+    );
+
+
+  if(!products.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="8" class="empty">
+          لا توجد منتجات
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    products.map(
+      p=>{
+
+        const qty =
+          number(p.qty);
+
+        const value =
+          qty *
+          number(p.cost);
+
+        const min =
+          number(
+            p.minStock ??
+            db.settings.minStock
+          );
+
+
+        const status =
+          qty <= min
+          ?
+          `<span class="badge badge-red">
+             مخزون ضعيف
+           </span>`
+          :
+          `<span class="badge badge-green">
+             جيد
+           </span>`;
+
+
+        return `
+        <tr>
+
+          <td>
+            <strong>
+              ${escapeHtml(p.name)}
+            </strong>
+          </td>
+
+          <td>
+            ${escapeHtml(p.category)}
+          </td>
+
+          <td>
+            ${money(p.cost)}
+          </td>
+
+          <td>
+            ${money(p.price)}
+          </td>
+
+          <td>
+            ${qty}
+          </td>
+
+          <td>
+            ${money(value)}
+          </td>
+
+          <td>
+            ${status}
+          </td>
+
+          <td>
+
+            <div class="actions">
+
+              <button
+                class="btn-secondary"
+                onclick="editProduct('${p.id}')">
+                تعديل
+              </button>
+
+              <button
+                class="btn-danger"
+                onclick="deleteProduct('${p.id}')">
+                حذف
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+        `;
+
+      }
+    ).join('');
+
+}
+
+
+function resetProductForm(){
+
+  document.getElementById(
+    'productForm'
+  ).reset();
+
+
+  document.getElementById(
+    'productId'
+  ).value='';
+
+
+  document.getElementById(
+    'productFormTitle'
+  ).textContent =
+    'إضافة منتوج جديد';
+
+
+  document.getElementById(
+    'pMin'
+  ).value =
+    db.settings.minStock || 3;
+
+}
+
+
+function editProduct(productId){
+
+  const p =
+    db.products.find(
+      x=>x.id===productId
+    );
+
+
+  if(!p) return;
+
+
+  document.getElementById(
+    'productId'
+  ).value =
+    p.id;
+
+
+  document.getElementById(
+    'pName'
+  ).value =
+    p.name;
+
+
+  document.getElementById(
+    'pCategory'
+  ).value =
+    p.category;
+
+
+  document.getElementById(
+    'pCost'
+  ).value =
+    p.cost;
+
+
+  document.getElementById(
+    'pPrice'
+  ).value =
+    p.price;
+
+
+  document.getElementById(
+    'pQty'
+  ).value =
+    p.qty;
+
+
+  document.getElementById(
+    'pMin'
+  ).value =
+    p.minStock ??
+    db.settings.minStock;
+
+
+  document.getElementById(
+    'productFormTitle'
+  ).textContent =
+    'تعديل المنتوج';
+
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+}
+
+
+async function deleteProduct(productId){
+
+  const p =
+    db.products.find(
+      x=>x.id===productId
+    );
+
+
+  if(!p) return;
+
+
+  if(
+    !confirm(
+      `واش متأكد بلي بغيتي تحذف "${p.name}"؟`
+    )
+  )
+    return;
+
+
+  db.products =
+    db.products.filter(
+      x=>x.id!==productId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف المنتوج');
+
+}
+
+
+/* =========================================================
+   SALES
+========================================================= */
+
+function renderSales(){
+
+  const tbody =
+    document.getElementById(
+      'salesTable'
+    );
+
+
+  const sales =
+    [...db.sales]
+      .sort(
+        (a,b)=>
+          new Date(b.date)
+          -
+          new Date(a.date)
+      );
+
+
+  if(!sales.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="8" class="empty">
+          لا توجد مبيعات
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    sales.map(
+      sale=>{
+
+        const product =
+          db.products.find(
+            p=>p.id===sale.productId
+          );
+
+
+        const remaining =
+          number(sale.total)
+          -
+          number(sale.paid);
+
+
+        return `
+        <tr>
+
+          <td>
+            ${formatDate(sale.date)}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              sale.customer || 'زبون'
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              sale.productName ||
+              product?.name ||
+              '-'
+            )}
+          </td>
+
+          <td>
+            ${sale.qty}
+          </td>
+
+          <td>
+            ${money(sale.total)}
+          </td>
+
+          <td>
+            ${money(sale.paid)}
+          </td>
+
+          <td>
+            ${
+              remaining > 0
+              ?
+              `<span class="badge badge-red">
+                ${money(remaining)}
+              </span>`
+              :
+              `<span class="badge badge-green">
+                مؤدى
+              </span>`
+            }
+          </td>
+
+          <td>
+
+            <button
+              class="btn btn-danger"
+              onclick="deleteSale('${sale.id}')">
+              حذف
+            </button>
+
+          </td>
+
+        </tr>
+        `;
+
+      }
+    ).join('');
+
+}
+
+
+async function deleteSale(saleId){
+
+  const sale =
+    db.sales.find(
+      s=>s.id===saleId
+    );
+
+
+  if(!sale) return;
+
+
+  if(
+    !confirm(
+      'واش متأكد بغيتي تحذف هاد البيع؟'
+    )
+  )
+    return;
+
+
+  /*
+    نرجعو الكمية للمخزون
+  */
+
+  const product =
+    db.products.find(
+      p=>p.id===sale.productId
+    );
+
+
+  if(product){
+
+    product.qty =
+      number(product.qty)
+      +
+      number(sale.qty);
+
+  }
+
+
+  db.sales =
+    db.sales.filter(
+      s=>s.id!==saleId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف البيع ورجعت الكمية للمخزون');
+
+}
+
+
+/* =========================================================
+   EXPENSES
+========================================================= */
+
+function renderExpenses(){
+
+  const tbody =
+    document.getElementById(
+      'expensesTable'
+    );
+
+
+  const expenses =
+    [...db.expenses]
+      .sort(
+        (a,b)=>
+          new Date(b.date)
+          -
+          new Date(a.date)
+      );
+
+
+  if(!expenses.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="5" class="empty">
+          لا توجد مصاريف
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    expenses.map(
+      e=>`
+
+      <tr>
+
+        <td>
+          ${formatDate(e.date)}
+        </td>
+
+        <td>
+          ${escapeHtml(e.name)}
+        </td>
+
+        <td>
+          ${money(e.amount)}
+        </td>
+
+        <td>
+          ${escapeHtml(e.notes || '-')}
+        </td>
+
+        <td>
+
+          <button
+            class="btn btn-danger"
+            onclick="deleteExpense('${e.id}')">
+            حذف
+          </button>
+
+        </td>
+
+      </tr>
+
+      `
+    ).join('');
+
+}
+
+
+async function deleteExpense(expenseId){
+
+  if(
+    !confirm(
+      'واش متأكد بغيتي تحذف هاد المصروف؟'
+    )
+  )
+    return;
+
+
+  db.expenses =
+    db.expenses.filter(
+      e=>e.id!==expenseId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف المصروف');
+
+}
+
+
+/* =========================================================
+   CUSTOMERS
+========================================================= */
+
+function renderCustomers(){
+
+  const tbody =
+    document.getElementById(
+      'customersTable'
+    );
+
+
+  if(!db.customers.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="6" class="empty">
+          لا يوجد زبناء
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    db.customers.map(
+      customer=>{
+
+        const sales =
+          db.sales.filter(
+            s=>
+              s.customerId===
+              customer.id
+          );
+
+
+        const total =
+          sales.reduce(
+            (sum,s)=>
+              sum +
+              number(s.total),
+            0
+          );
+
+
+        const paid =
+          sales.reduce(
+            (sum,s)=>
+              sum +
+              number(s.paid),
+            0
+          );
+
+
+        const debt =
+          total-paid;
+
+
+        return `
+        <tr>
+
+          <td>
+            ${escapeHtml(
+              customer.name
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              customer.phone || '-'
+            )}
+          </td>
+
+          <td>
+            ${money(total)}
+          </td>
+
+          <td>
+            ${money(paid)}
+          </td>
+
+          <td>
+            ${
+              debt>0
+              ?
+              `<span class="badge badge-red">
+                ${money(debt)}
+              </span>`
+              :
+              `<span class="badge badge-green">
+                لا يوجد
+              </span>`
+            }
+          </td>
+
+          <td>
+
+            <button
+              class="btn btn-danger"
+              onclick="deleteCustomer('${customer.id}')">
+              حذف
+            </button>
+
+          </td>
+
+        </tr>
+        `;
+
+      }
+    ).join('');
+
+}
+
+
+async function deleteCustomer(customerId){
+
+  const hasSales =
+    db.sales.some(
+      s=>s.customerId===customerId
+    );
+
+
+  if(hasSales){
+
+    toast(
+      'مايمكنش تحذف زبون عندو مبيعات'
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !confirm(
+      'واش متأكد بغيتي تحذف الزبون؟'
+    )
+  )
+    return;
+
+
+  db.customers =
+    db.customers.filter(
+      c=>c.id!==customerId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف الزبون');
+
+}
+
+
+/* =========================================================
+   SUPPLIERS
+========================================================= */
+
+function renderSuppliers(){
+
+  const tbody =
+    document.getElementById(
+      'suppliersTable'
+    );
+
+
+  if(!db.suppliers.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="4" class="empty">
+          لا يوجد موردون
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    db.suppliers.map(
+      s=>`
+
+      <tr>
+
+        <td>
+          ${escapeHtml(s.name)}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            s.phone || '-'
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            s.notes || '-'
+          )}
+        </td>
+
+        <td>
+
+          <button
+            class="btn btn-danger"
+            onclick="deleteSupplier('${s.id}')">
+            حذف
+          </button>
+
+        </td>
+
+      </tr>
+
+      `
+    ).join('');
+
+}
+
+
+async function deleteSupplier(supplierId){
+
+  if(
+    !confirm(
+      'واش متأكد بغيتي تحذف المورد؟'
+    )
+  )
+    return;
+
+
+  db.suppliers =
+    db.suppliers.filter(
+      s=>s.id!==supplierId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف المورد');
+
+}
+
+
+/* =========================================================
+   REPORTS
+========================================================= */
+
+function renderReports(){
+
+  const s =
+    calculateStats();
+
+
+  document.getElementById(
+    'reportSales'
+  ).textContent =
+    money(s.sales);
+
+
+  document.getElementById(
+    'reportCost'
+  ).textContent =
+    money(s.cost);
+
+
+  document.getElementById(
+    'reportGross'
+  ).textContent =
+    money(s.gross);
+
+
+  document.getElementById(
+    'reportNet'
+  ).textContent =
+    money(s.net);
+
+
+  const tbody =
+    document.getElementById(
+      'reportStock'
+    );
+
+
+  if(!db.products.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="5" class="empty">
+          لا توجد منتجات
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    db.products.map(
+      p=>{
+
+        const qty =
+          number(p.qty);
+
+        const costValue =
+          qty *
+          number(p.cost);
+
+        const saleValue =
+          qty *
+          number(p.price);
+
+        const potentialProfit =
+          saleValue -
+          costValue;
+
+
+        return `
+        <tr>
+
+          <td>
+            ${escapeHtml(p.name)}
+          </td>
+
+          <td>
+            ${qty}
+          </td>
+
+          <td>
+            ${money(costValue)}
+          </td>
+
+          <td>
+            ${money(saleValue)}
+          </td>
+
+          <td>
+            ${money(potentialProfit)}
+          </td>
+
+        </tr>
+        `;
+
+      }
+    ).join('');
+
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+function renderSettings(){
+
+  document.getElementById(
+    'shopName'
+  ).value =
+    db.settings.shop || '';
+
+
+  document.getElementById(
+    'managerName'
+  ).value =
+    db.settings.manager || '';
+
+
+  document.getElementById(
+    'minStock'
+  ).value =
+    db.settings.minStock ?? 3;
+
+}
+
+
+/* =========================================================
+   RENDER ALL
+========================================================= */
+
+function renderAll(){
+
+  renderDashboard();
+
+  renderProductSelect();
+
+  renderProducts();
+
+  renderSales();
+
+  renderExpenses();
+
+  renderCustomers();
+
+  renderSuppliers();
+
+  renderReports();
+
+  renderSettings();
+
+}
+
+
+/* =========================================================
+   PRODUCT FORM
+========================================================= */
+
+document
+  .getElementById('productForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const productId =
+        document.getElementById(
+          'productId'
+        ).value;
+
+
+      const name =
+        document.getElementById(
+          'pName'
+        ).value.trim();
+
+
+      const category =
+        document.getElementById(
+          'pCategory'
+        ).value;
+
+
+      const cost =
+        number(
+          document.getElementById(
+            'pCost'
+          ).value
+        );
+
+
+      const price =
+        number(
+          document.getElementById(
+            'pPrice'
+          ).value
+        );
+
+
+      const qty =
+        number(
+          document.getElementById(
+            'pQty'
+          ).value
+        );
+
+
+      const minStock =
+        number(
+          document.getElementById(
+            'pMin'
+          ).value
+        );
+
+
+      if(!name){
+
+        toast(
+          'دخل اسم المنتوج'
+        );
+
+        return;
+
+      }
+
+
+      if(productId){
+
+        const product =
+          db.products.find(
+            p=>p.id===productId
+          );
+
+
+        if(product){
+
+          product.name =
+            name;
+
+          product.category =
+            category;
+
+          product.cost =
+            cost;
+
+          product.price =
+            price;
+
+          product.qty =
+            qty;
+
+          product.minStock =
+            minStock;
+
+        }
+
+
+        toast(
+          'تم تعديل المنتوج'
+        );
+
+      }else{
+
+        db.products.push({
+
+          id:id(),
+
+          name,
+
+          category,
+
+          cost,
+
+          price,
+
+          qty,
+
+          minStock,
+
+          createdAt:dateNow()
+
+        });
+
+
+        toast(
+          'تمت إضافة المنتوج'
+        );
+
+      }
+
+
+      await saveDB();
+
+      resetProductForm();
+
+    }
+  );
+
+
+/* =========================================================
+   SALE FORM
+========================================================= */
+
+document
+  .getElementById('saleProduct')
+  .addEventListener(
+    'change',
+    function(){
+
+      const product =
+        db.products.find(
+          p=>p.id===this.value
+        );
+
+
+      if(product){
+
+        document.getElementById(
+          'salePrice'
+        ).value =
+          product.price;
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById('saleForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const productId =
+        document.getElementById(
+          'saleProduct'
+        ).value;
+
+
+      const product =
+        db.products.find(
+          p=>p.id===productId
+        );
+
+
+      if(!product){
+
+        toast(
+          'اختار المنتوج'
+        );
+
+        return;
+
+      }
+
+
+      const qty =
+        number(
+          document.getElementById(
+            'saleQty'
+          ).value
+        );
+
+
+      const price =
+        number(
+          document.getElementById(
+            'salePrice'
+          ).value
+        );
+
+
+      const paid =
+        number(
+          document.getElementById(
+            'salePaid'
+          ).value
+        );
+
+
+      if(qty<=0){
+
+        toast(
+          'الكمية خاصها تكون أكبر من 0'
+        );
+
+        return;
+
+      }
+
+
+      if(qty>number(product.qty)){
+
+        toast(
+          `المخزون غير كافي. المتوفر: ${product.qty}`
+        );
+
+        return;
+
+      }
+
+
+      if(price<0){
+
+        toast(
+          'الثمن غير صحيح'
+        );
+
+        return;
+
+      }
+
+
+      const total =
+        qty *
+        price;
+
+
+      if(paid>total){
+
+        toast(
+          'المبلغ المؤدى أكبر من مجموع البيع'
+        );
+
+        return;
+
+      }
+
+
+      let customerName =
+        document.getElementById(
+          'saleCustomer'
+        ).value.trim();
+
+
+      let customerId = null;
+
+
+      if(customerName){
+
+        let customer =
+          db.customers.find(
+            c=>
+              c.name
+                .trim()
+                .toLowerCase()
+              ===
+              customerName
+                .trim()
+                .toLowerCase()
+          );
+
+
+        if(!customer){
+
+          customer={
+
+            id:id(),
+
+            name:customerName,
+
+            phone:'',
+
+            createdAt:dateNow()
+
+          };
+
+
+          db.customers.push(
+            customer
+          );
+
+        }
+
+
+        customerId =
+          customer.id;
+
+      }
+
+
+      const sale={
+
+        id:id(),
+
+        date:dateNow(),
+
+        customer:
+          customerName || 'زبون',
+
+        customerId,
+
+        productId,
+
+        productName:
+          product.name,
+
+        qty,
+
+        price,
+
+        cost:
+          number(product.cost)
+          *
+          qty,
+
+        total,
+
+        paid,
+
+        paymentMethod:
+          document.getElementById(
+            'salePaymentMethod'
+          ).value,
+
+        notes:
+          document.getElementById(
+            'saleNotes'
+          ).value.trim()
+
+      };
+
+
+      db.sales.push(
+        sale
+      );
+
+
+      product.qty =
+        number(product.qty)
+        -
+        qty;
+
+
+      await saveDB();
+
+
+      this.reset();
+
+
+      document.getElementById(
+        'saleQty'
+      ).value=1;
+
+
+      document.getElementById(
+        'salePaid'
+      ).value=0;
+
+
+      toast(
+        'تم تسجيل البيع بنجاح'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   EXPENSE FORM
+========================================================= */
+
+document
+  .getElementById('expenseForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const name =
+        document.getElementById(
+          'expenseName'
+        ).value.trim();
+
+
+      const amount =
+        number(
+          document.getElementById(
+            'expenseAmount'
+          ).value
+        );
+
+
+      const notes =
+        document.getElementById(
+          'expenseNotes'
+        ).value.trim();
+
+
+      if(!name || amount<=0){
+
+        toast(
+          'دخل معلومات صحيحة'
+        );
+
+        return;
+
+      }
+
+
+      db.expenses.push({
+
+        id:id(),
+
+        date:dateNow(),
+
+        name,
+
+        amount,
+
+        notes
+
       });
 
-    if(error) throw error;
 
-    console.log('Cloud sync: OK');
-  }catch(e){
-    console.error('Cloud sync error:',e);
-    toast('تحفظات البيانات محلياً، ولكن المزامنة مع السحابة فشلات');
-  }
-}function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
-function money(n){return (Number(n)||0).toLocaleString('fr-MA',{minimumFractionDigits:0,maximumFractionDigits:2})+' DH'}
-function today(){let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.display='none',2800)}
-function sum(a,fn){return a.reduce((s,x)=>s+(fn?Number(fn(x)||0):Number(x)||0),0)}
-function prod(id){return db.products.find(p=>p.id===id)}
-function saleTotal(s){return Number(s.qty)*Number(s.price)}
-function saleCost(s){return Number(s.qty)*Number(s.cost)}
-function salePaid(s){return Number(s.paid)||0}
-function saleDue(s){return Math.max(0,saleTotal(s)-salePaid(s))}
-function monthStart(){return today().slice(0,7)}
-function inPeriod(date,period){if(period==='all')return true;if(period==='today')return date===today();return (date||'').slice(0,7)===monthStart()}
-function filteredSales(period){return db.sales.filter(s=>inPeriod(s.date,period))}
-function filteredExpenses(period){return db.expenses.filter(e=>inPeriod(e.date,period))}
-function go(page){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+page).classList.add('active');document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.page===page));if(page==='reports')runReport()}
-document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
-document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.goto)));
-document.getElementById('quickSaleTop').onclick=()=>go('sales');
-function renderDashboard(){let period=document.getElementById('dashPeriod').value,ss=filteredSales(period),ee=filteredExpenses(period),sales=sum(ss,saleTotal),cost=sum(ss,saleCost),expenses=sum(ee,e=>e.amount),paid=sum(ss,salePaid),debts=sum(db.sales,saleDue),stock=sum(db.products,p=>p.qty*p.cost);
-document.getElementById('mSales').textContent=money(sales);document.getElementById('mGross').textContent=money(sales-cost);document.getElementById('mExpenses').textContent=money(expenses);document.getElementById('mNet').textContent=money(sales-cost-expenses);document.getElementById('mCollected').textContent=money(paid);document.getElementById('mDebts').textContent=money(debts);document.getElementById('mStock').textContent=money(stock);document.getElementById('mCount').textContent=ss.length;
-let recent=[...db.sales].sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);document.getElementById('recentSales').innerHTML=recent.length?recent.map(s=>`<tr><td>${esc(s.date)}</td><td>${esc(s.productName)}</td><td>${money(saleTotal(s))}</td><td>${money(saleTotal(s)-saleCost(s))}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">مازال ما تسجلات حتى عملية بيع</td></tr>';
-let low=db.products.filter(p=>Number(p.qty)<=Number(p.min??db.settings.minStock??3)).sort((a,b)=>a.qty-b.qty).slice(0,6);document.getElementById('lowStock').innerHTML=low.length?low.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.size||'—')}</td><td><span class="tag ${p.qty<=0?'red':'orange'}">${p.qty}</span></td></tr>`).join(''):'<tr><td colspan="3" class="empty">لا توجد سلع تحت حد التنبيه</td></tr>'}
-function renderProductOptions(){let sel=document.getElementById('saleProduct'),old=sel.value;sel.innerHTML='<option value="">اختار المنتوج</option>'+db.products.map(p=>`<option value="${p.id}">${esc(p.name)}${p.size?' · '+esc(p.size):''} — متوفر: ${p.qty}</option>`).join('');if(prod(old))sel.value=old}
-function renderSales(){let q=(document.getElementById('salesSearch').value||'').toLowerCase(),rows=[...db.sales].sort((a,b)=>b.createdAt-a.createdAt).filter(s=>(s.productName+' '+(s.customer||'')).toLowerCase().includes(q));document.getElementById('salesRows').innerHTML=rows.length?rows.map(s=>`<tr><td>${esc(s.date)}</td><td>${esc(s.productName)}</td><td>${s.qty}</td><td>${money(saleTotal(s))}</td><td>${money(saleCost(s))}</td><td>${money(saleTotal(s)-saleCost(s))}</td><td>${money(salePaid(s))}</td><td>${saleDue(s)>0?`<span class="tag red">${money(saleDue(s))}</span>`:'—'}</td><td>${esc(s.customer||'—')}</td><td><button class="danger small-btn" onclick="deleteSale('${s.id}')">حذف</button></td></tr>`).join(''):'<tr><td colspan="10" class="empty">لا توجد مبيعات مطابقة</td></tr>'}
-function renderStock(){let q=(document.getElementById('stockSearch').value||'').toLowerCase();let rows=db.products.filter(p=>(p.name+' '+p.sku+' '+p.category+' '+p.size+' '+p.color).toLowerCase().includes(q));document.getElementById('stockCount').textContent=db.products.length+' منتوج';document.getElementById('stockRows').innerHTML=rows.length?rows.map(p=>`<tr><td><strong>${esc(p.name)}</strong><br><span class="muted">${esc(p.sku||'')}</span></td><td>${esc(p.category)}</td><td>${esc([p.size,p.color].filter(Boolean).join(' / ')||'—')}</td><td>${money(p.cost)}</td><td>${money(p.price)}</td><td><span class="tag ${(p.qty<=0?'red':p.qty<=Number(p.min??3)?'orange':'')}">${p.qty}</span></td><td>${money(p.qty*p.cost)}</td><td><button class="secondary small-btn" onclick="editProduct('${p.id}')">تعديل</button> <button class="danger small-btn" onclick="deleteProduct('${p.id}')">حذف</button></td></tr>`).join(''):'<tr><td colspan="8" class="empty">ما كاين حتى منتوج. زيد أول منتوج من الاستمارة.</td></tr>';renderProductOptions()}
-function renderExpenses(){let q=(document.getElementById('expenseSearch').value||'').toLowerCase(),rows=[...db.expenses].sort((a,b)=>b.createdAt-a.createdAt).filter(e=>(e.category+' '+e.notes+' '+e.method).toLowerCase().includes(q));document.getElementById('expenseRows').innerHTML=rows.length?rows.map(e=>`<tr><td>${esc(e.date)}</td><td>${esc(e.category)}</td><td>${money(e.amount)}</td><td>${esc(e.method)}</td><td>${esc(e.notes||'—')}</td><td><button class="danger small-btn" onclick="deleteExpense('${e.id}')">حذف</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">ما تسجل حتى مصروف</td></tr>'}
-function renderCustomers(){document.getElementById('customerRows').innerHTML=db.customers.length?db.customers.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.phone||'—')}</td><td>${esc(c.notes||'—')}</td><td><button class="danger small-btn" onclick="deleteCustomer('${c.id}')">حذف</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">مازال ما تزاد حتى زبون</td></tr>';
-let debtSales=db.sales.filter(s=>saleDue(s)>0);document.getElementById('debtSale').innerHTML='<option value="">اختار عملية بيع</option>'+debtSales.map(s=>`<option value="${s.id}">${esc(s.customer||'زبون بدون اسم')} — ${esc(s.productName)} — متبقي ${money(saleDue(s))}</option>`).join('');document.getElementById('debtsRows').innerHTML=debtSales.length?debtSales.map(s=>`<tr><td>${esc(s.date)}</td><td>${esc(s.customer||'بدون اسم')}</td><td>${esc(s.productName)}</td><td>${money(saleTotal(s))}</td><td>${money(salePaid(s))}</td><td><span class="tag red">${money(saleDue(s))}</span></td></tr>`).join(''):'<tr><td colspan="6" class="empty">ما كاين حتى دين مسجل</td></tr>'}
-function renderSuppliers(){document.getElementById('supplierRows').innerHTML=db.suppliers.length?db.suppliers.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.phone||'—')}</td><td>${money(s.debt)}</td><td>${esc(s.notes||'—')}</td><td><button class="danger small-btn" onclick="deleteSupplier('${s.id}')">حذف</button></td></tr>`).join(''):'<tr><td colspan="5" class="empty">مازال ما تزاد حتى مورد</td></tr>'}
-function renderAll(){renderDashboard();renderSales();renderStock();renderExpenses();renderCustomers();renderSuppliers();document.getElementById('shopTitle').textContent=db.settings.shop||'Makkaoui Clothes'}
-document.getElementById('dashPeriod').onchange=renderDashboard;
-document.getElementById('saleProduct').onchange=()=>{let p=prod(document.getElementById('saleProduct').value);if(p){document.getElementById('salePrice').value=p.price;document.getElementById('salePaid').value=(Number(p.price)*Number(document.getElementById('saleQty').value||1)).toFixed(2)}};
-document.getElementById('saleQty').oninput=()=>{let p=prod(document.getElementById('saleProduct').value);if(p)document.getElementById('salePaid').value=(Number(document.getElementById('salePrice').value||p.price)*Number(document.getElementById('saleQty').value||1)).toFixed(2)};
-document.getElementById('salePrice').oninput=()=>{document.getElementById('salePaid').value=(Number(document.getElementById('salePrice').value||0)*Number(document.getElementById('saleQty').value||1)).toFixed(2)};
-document.getElementById('saleForm').addEventListener('submit',e=>{e.preventDefault();let p=prod(document.getElementById('saleProduct').value),qty=Number(document.getElementById('saleQty').value),price=Number(document.getElementById('salePrice').value),paid=Number(document.getElementById('salePaid').value);if(!p)return toast('اختار المنتوج أولاً');if(qty<=0||!Number.isInteger(qty))return toast('الكمية خاصها تكون عدد صحيح موجب');if(qty>p.qty)return toast('الكمية المطلوبة أكبر من المخزون المتوفر');if(price<0||paid<0||paid>qty*price)return toast('راجع ثمن البيع والمبلغ المؤدى');p.qty-=qty;db.sales.push({id:id(),createdAt:Date.now(),date:document.getElementById('saleDate').value,productId:p.id,productName:p.name,qty,price,cost:Number(p.cost),paid,method:document.getElementById('saleMethod').value,customer:document.getElementById('saleCustomer').value.trim(),channel:document.getElementById('saleChannel').value,notes:document.getElementById('saleNotes').value.trim()});let name=p.name;e.target.reset();document.getElementById('saleDate').value=today();document.getElementById('saleQty').value=1;saveDB();toast('تسجلات عملية بيع: '+name)});
-document.getElementById('productForm').addEventListener('submit',e=>{e.preventDefault();let pid=document.getElementById('productId').value;let data={name:document.getElementById('pName').value.trim(),category:document.getElementById('pCategory').value,sku:document.getElementById('pSku').value.trim(),size:document.getElementById('pSize').value.trim(),color:document.getElementById('pColor').value.trim(),cost:Number(document.getElementById('pCost').value),price:Number(document.getElementById('pPrice').value),qty:Number(document.getElementById('pQty').value),min:Number(document.getElementById('pMin').value||db.settings.minStock||3)};if(data.cost<0||data.price<0||data.qty<0)return toast('القيم ما خاصهاش تكون سالبة');if(pid){let p=prod(pid);if(p)Object.assign(p,data);document.getElementById('productFormTitle').textContent='إضافة منتوج جديد';document.getElementById('saveProductBtn').textContent='حفظ المنتوج';document.getElementById('cancelProductEdit').style.display='none'}else db.products.push({...data,id:id(),createdAt:Date.now()});e.target.reset();document.getElementById('productId').value='';document.getElementById('pMin').value=db.settings.minStock||3;saveDB();toast('تحفظ المنتوج بنجاح')});
-window.editProduct=pid=>{let p=prod(pid);if(!p)return;document.getElementById('productId').value=p.id;for(let [field,key] of [['pName','name'],['pCategory','category'],['pSku','sku'],['pSize','size'],['pColor','color'],['pCost','cost'],['pPrice','price'],['pQty','qty'],['pMin','min']])document.getElementById(field).value=p[key]??'';document.getElementById('productFormTitle').textContent='تعديل المنتوج';document.getElementById('saveProductBtn').textContent='حفظ التعديلات';document.getElementById('cancelProductEdit').style.display='inline-block';go('stock');window.scrollTo({top:0,behavior:'smooth'})};
-document.getElementById('cancelProductEdit').onclick=()=>{document.getElementById('productForm').reset();document.getElementById('productId').value='';document.getElementById('productFormTitle').textContent='إضافة منتوج جديد';document.getElementById('saveProductBtn').textContent='حفظ المنتوج';document.getElementById('cancelProductEdit').style.display='none'};
-window.deleteProduct=pid=>{if(db.sales.some(s=>s.productId===pid))return toast('ما يمكنش تحذف منتوج عندو مبيعات مسجلة');if(confirm('واش متأكد من حذف المنتوج؟')){db.products=db.products.filter(p=>p.id!==pid);saveDB();toast('تحذف المنتوج')}};
-window.deleteSale=sid=>{if(!confirm('حذف عملية البيع؟ غادي ترجع الكمية للمخزون.'))return;let s=db.sales.find(x=>x.id===sid);if(s){let p=prod(s.productId);if(p)p.qty+=Number(s.qty);db.sales=db.sales.filter(x=>x.id!==sid);saveDB();toast('تحذفات عملية البيع ورجعات الكمية للمخزون')}};
-document.getElementById('expenseForm').addEventListener('submit',e=>{e.preventDefault();db.expenses.push({id:id(),createdAt:Date.now(),category:document.getElementById('eCategory').value,amount:Number(document.getElementById('eAmount').value),date:document.getElementById('eDate').value,method:document.getElementById('eMethod').value,notes:document.getElementById('eNotes').value.trim()});e.target.reset();document.getElementById('eDate').value=today();saveDB();toast('تسجل المصروف بنجاح')});
-window.deleteExpense=eid=>{if(confirm('واش متأكد من حذف المصروف؟')){db.expenses=db.expenses.filter(x=>x.id!==eid);saveDB();toast('تحذف المصروف')}};
-document.getElementById('customerForm').addEventListener('submit',e=>{e.preventDefault();db.customers.push({id:id(),name:document.getElementById('cName').value.trim(),phone:document.getElementById('cPhone').value.trim(),notes:document.getElementById('cNotes').value.trim()});e.target.reset();saveDB();toast('تزّاد الزبون')});
-window.deleteCustomer=cid=>{if(confirm('حذف معلومات الزبون؟')){db.customers=db.customers.filter(c=>c.id!==cid);saveDB()}};
-document.getElementById('paymentForm').addEventListener('submit',e=>{e.preventDefault();let s=db.sales.find(x=>x.id===document.getElementById('debtSale').value),amt=Number(document.getElementById('debtAmount').value);if(!s)return toast('اختار عملية بيع');if(amt<=0||amt>saleDue(s))return toast('المبلغ أكبر من الدين المتبقي أو غير صالح');s.paid=salePaid(s)+amt;db.payments.push({id:id(),saleId:s.id,amount:amt,date:document.getElementById('debtDate').value,createdAt:Date.now()});e.target.reset();document.getElementById('debtDate').value=today();saveDB();toast('تسجل الأداء وتحدّث الدين')});
-document.getElementById('supplierForm').addEventListener('submit',e=>{e.preventDefault();db.suppliers.push({id:id(),name:document.getElementById('supName').value.trim(),phone:document.getElementById('supPhone').value.trim(),debt:Number(document.getElementById('supDebt').value||0),notes:document.getElementById('supNotes').value.trim()});e.target.reset();document.getElementById('supDebt').value=0;saveDB();toast('تحفظ المورد')});
-window.deleteSupplier=sid=>{if(confirm('حذف المورد؟')){db.suppliers=db.suppliers.filter(s=>s.id!==sid);saveDB()}};
-function runReport(){let from=document.getElementById('reportFrom').value||'0000-01-01',to=document.getElementById('reportTo').value||'9999-12-31';let ss=db.sales.filter(s=>s.date>=from&&s.date<=to),ee=db.expenses.filter(x=>x.date>=from&&x.date<=to),sales=sum(ss,saleTotal),cost=sum(ss,saleCost),ex=sum(ee,x=>x.amount);for(let [idv,val] of [['rSales',sales],['rCost',cost],['rGross',sales-cost],['rNet',sales-cost-ex]])document.getElementById(idv).textContent=money(val);document.getElementById('reportSummary').innerHTML=`الفترة: <strong>${esc(from)}</strong> إلى <strong>${esc(to)}</strong><br>عدد عمليات البيع: <strong>${ss.length}</strong><br>المبالغ المقبوضة على هذه المبيعات: <strong>${money(sum(ss,salePaid))}</strong><br>الديون الجديدة المتبقية على مبيعات الفترة: <strong>${money(sum(ss,saleDue))}</strong><br>مجموع المصاريف المسجلة: <strong>${money(ex)}</strong><br>عدد المصاريف: <strong>${ee.length}</strong>`}
-document.getElementById('runReport').onclick=runReport;
-function csvDownload(filename,rows){let csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url)}
-document.getElementById('exportSales').onclick=()=>csvDownload('makkaoui-sales.csv',[['التاريخ','المنتوج','الكمية','ثمن الوحدة','المجموع','التكلفة','الربح','المؤدى','المتبقي','الزبون','طريقة الأداء','القناة'],...db.sales.map(s=>[s.date,s.productName,s.qty,s.price,saleTotal(s),saleCost(s),saleTotal(s)-saleCost(s),salePaid(s),saleDue(s),s.customer,s.method,s.channel])]);
-document.getElementById('exportExpenses').onclick=()=>csvDownload('makkaoui-expenses.csv',[['التاريخ','التصنيف','المبلغ','طريقة الأداء','ملاحظات'],...db.expenses.map(e=>[e.date,e.category,e.amount,e.method,e.notes])]);
-document.getElementById('exportAll').onclick=()=>csvDownload('makkaoui-summary.csv',[['النوع','التاريخ','الاسم','الكمية','المبلغ','ملاحظات'],...db.sales.map(s=>['بيع',s.date,s.productName,s.qty,saleTotal(s),`الربح ${saleTotal(s)-saleCost(s)}; المؤدى ${salePaid(s)}; المتبقي ${saleDue(s)}`]),...db.expenses.map(e=>['مصروف',e.date,e.category,'',e.amount,e.notes||''])]);
-document.getElementById('settingsForm').addEventListener('submit',e=>{e.preventDefault();db.settings.shop=document.getElementById('setShop').value.trim()||'Makkaoui Clothes';db.settings.manager=document.getElementById('setManager').value.trim();db.settings.minStock=Number(document.getElementById('setMin').value||3);saveDB();toast('تحفظات الإعدادات')});
-document.getElementById('backupBtn').onclick=()=>{let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='makkaoui-backup-'+today()+'.json';a.click();URL.revokeObjectURL(url);toast('تنزلات النسخة الاحتياطية')};
-document.getElementById('restoreFile').addEventListener('change',async e=>{let file=e.target.files[0];if(!file)return;try{let x=JSON.parse(await file.text());if(!x||!Array.isArray(x.products)||!Array.isArray(x.sales)||!Array.isArray(x.expenses))throw Error();if(confirm('استرجاع النسخة سيعوض البيانات الحالية. واش متأكد؟')){db=Object.assign(blank(),x);saveDB();toast('ترجعات البيانات بنجاح')}}catch(err){toast('الملف غير صالح أو غير متوافق')}e.target.value=''});
-document.getElementById('clearData').onclick=()=>{if(confirm('تحذير: غادي يتم مسح جميع البيانات نهائياً من هذا المتصفح. دير نسخة احتياطية قبل. واش متأكد؟')){db=blank();saveDB();toast('تم مسح البيانات')}};
-document.getElementById('salesSearch').oninput=renderSales;document.getElementById('stockSearch').oninput=renderStock;document.getElementById('expenseSearch').oninput=renderExpenses;
-document.getElementById('todayText').textContent=new Date().toLocaleDateString('ar-MA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-for(let idv of ['saleDate','eDate','debtDate'])document.getElementById(idv).value=today();
-document.getElementById('reportFrom').value=monthStart()+'-01';document.getElementById('reportTo').value=today();
-document.getElementById('setShop').value=db.settings.shop||'Makkaoui Clothes';document.getElementById('setManager').value=db.settings.manager||'';document.getElementById('setMin').value=db.settings.minStock??3;
+      await saveDB();
+
+
+      this.reset();
+
+
+      toast(
+        'تم تسجيل المصروف'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   CUSTOMER FORM
+========================================================= */
+
+document
+  .getElementById('customerForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const name =
+        document.getElementById(
+          'customerName'
+        ).value.trim();
+
+
+      const phone =
+        document.getElementById(
+          'customerPhone'
+        ).value.trim();
+
+
+      if(!name){
+
+        toast(
+          'دخل اسم الزبون'
+        );
+
+        return;
+
+      }
+
+
+      db.customers.push({
+
+        id:id(),
+
+        name,
+
+        phone,
+
+        createdAt:dateNow()
+
+      });
+
+
+      await saveDB();
+
+
+      this.reset();
+
+
+      toast(
+        'تمت إضافة الزبون'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   SUPPLIER FORM
+========================================================= */
+
+document
+  .getElementById('supplierForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const name =
+        document.getElementById(
+          'supplierName'
+        ).value.trim();
+
+
+      const phone =
+        document.getElementById(
+          'supplierPhone'
+        ).value.trim();
+
+
+      const notes =
+        document.getElementById(
+          'supplierNotes'
+        ).value.trim();
+
+
+      if(!name){
+
+        toast(
+          'دخل اسم المورد'
+        );
+
+        return;
+
+      }
+
+
+      db.suppliers.push({
+
+        id:id(),
+
+        name,
+
+        phone,
+
+        notes,
+
+        createdAt:dateNow()
+
+      });
+
+
+      await saveDB();
+
+
+      this.reset();
+
+
+      toast(
+        'تمت إضافة المورد'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   SETTINGS FORM
+========================================================= */
+
+document
+  .getElementById('settingsForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      db.settings.shop =
+        document.getElementById(
+          'shopName'
+        ).value.trim();
+
+
+      db.settings.manager =
+        document.getElementById(
+          'managerName'
+        ).value.trim();
+
+
+      db.settings.minStock =
+        number(
+          document.getElementById(
+            'minStock'
+          ).value
+        );
+
+
+      await saveDB();
+
+
+      toast(
+        'تم حفظ الإعدادات'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   BACKUP
+========================================================= */
+
+function exportBackup(){
+
+  const data =
+    JSON.stringify(
+      db,
+      null,
+      2
+    );
+
+
+  const blob =
+    new Blob(
+      [data],
+      {
+        type:'application/json'
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(blob);
+
+
+  const a =
+    document.createElement('a');
+
+
+  a.href=url;
+
+
+  a.download =
+    `Makkaoui-Backup-${new Date().toISOString().slice(0,10)}.json`;
+
+
+  a.click();
+
+
+  URL.revokeObjectURL(url);
+
+
+  toast(
+    'تم تحميل النسخة الاحتياطية'
+  );
+
+}
+
+
+function importBackup(event){
+
+  const file =
+    event.target.files[0];
+
+
+  if(!file)
+    return;
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    async function(){
+
+      try{
+
+        const imported =
+          JSON.parse(
+            reader.result
+          );
+
+
+        db =
+          Object.assign(
+            blank(),
+            imported
+          );
+
+
+        await saveDB();
+
+
+        renderAll();
+
+
+        toast(
+          'تم استرجاع النسخة الاحتياطية'
+        );
+
+
+      }catch(error){
+
+        console.error(error);
+
+        toast(
+          'النسخة الاحتياطية غير صحيحة'
+        );
+
+      }
+
+    };
+
+
+  reader.readAsText(file);
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
 renderAll();
+
+
+/*
+  نحاول نجيب البيانات من Cloud
+  بعد تحميل الصفحة.
+*/
+
+setTimeout(
+  ()=>{
+    loadCloudDB(false);
+  },
+  500
+);
+
 </script>
+
 </body>
 </html>
