@@ -19,6 +19,7 @@ main{min-width:0}.topbar{height:70px;background:#fff;border-bottom:1px solid var
 @media(max-width:1050px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}.layout{grid-template-columns:205px 1fr}.content{padding:18px}}
 @media(max-width:700px){.layout{display:block}.sidebar{position:sticky;top:0;z-index:5;padding:9px;flex-direction:row;overflow-x:auto;align-items:center}.brand{padding:4px 8px;margin:0;border:0;min-width:100px}.logo{font-size:17px}.brand small,.sidebar .foot{display:none}.nav{width:auto;min-width:max-content;padding:10px}.nav span{width:auto}.nav .nav-label{display:none}.topbar{height:auto;padding:12px 15px}.content{padding:14px}.heading{align-items:flex-start;flex-direction:column}.cards{gap:9px}.metric{padding:13px}.metric .value{font-size:20px}.form-grid{grid-template-columns:1fr}.quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar .small{display:none}}
 </style>
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="layout">
@@ -138,11 +139,76 @@ main{min-width:0}.topbar{height:70px;background:#fff;border-bottom:1px solid var
 <div id="toast" style="position:fixed;bottom:20px;left:20px;z-index:20;background:#10294b;color:white;padding:12px 18px;border-radius:10px;display:none;box-shadow:0 8px 25px #0002"></div>
 <script>
 const KEY='makkaoui_management_v1';
+ const SUPABASE_URL='https://lxidsrwfwxrbdqyyjezd.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='YOUR_PUBLISHABLE_KEY';
+
+const supabaseClient=window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
 const blank=()=>({products:[],sales:[],expenses:[],customers:[],suppliers:[],payments:[],settings:{shop:'Makkaoui Clothes',manager:'',minStock:3}});
 let db=loadDB();
 function loadDB(){try{return Object.assign(blank(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){return blank()}}
-function saveDB(){localStorage.setItem(KEY,JSON.stringify(db));renderAll()}
-function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+async function saveDB(){
+  localStorage.setItem(KEY,JSON.stringify(db));
+  renderAll();async function loadCloudDB(){
+  try{
+    const {data,error}=await supabaseClient
+      .from('app_state')
+      .select('data')
+      .eq('id',1)
+      .maybeSingle();
+
+    if(error) throw error;
+
+    if(data && data.data){
+      db=Object.assign(blank(),data.data);
+
+      localStorage.setItem(
+        KEY,
+        JSON.stringify(db)
+      );
+
+      renderAll();
+
+      toast('تمت مزامنة البيانات مع السحابة ☁️');
+    }else{
+      await supabaseClient
+        .from('app_state')
+        .upsert({
+          id:1,
+          data:db,
+          updated_at:new Date().toISOString()
+        });
+
+      console.log('Cloud database initialized');
+    }
+
+  }catch(e){
+    console.error('Cloud load error:',e);
+    toast('خدام محلياً — تعذر الاتصال بالسحابة');
+  }
+}
+
+loadCloudDB();
+
+  try{
+    const {error}=await supabaseClient
+      .from('app_state')
+      .upsert({
+        id:1,
+        data:db,
+        updated_at:new Date().toISOString()
+      });
+
+    if(error) throw error;
+
+    console.log('Cloud sync: OK');
+  }catch(e){
+    console.error('Cloud sync error:',e);
+    toast('تحفظات البيانات محلياً، ولكن المزامنة مع السحابة فشلات');
+  }
+}function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function money(n){return (Number(n)||0).toLocaleString('fr-MA',{minimumFractionDigits:0,maximumFractionDigits:2})+' DH'}
 function today(){let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
