@@ -564,8 +564,109 @@ th{
 </head>
 
 <body>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="
+  position:fixed;
+  inset:0;
+  background:#f1f5f9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+  direction:rtl;
+">
+  <div style="
+    width:100%;
+    max-width:400px;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 10px 35px rgba(0,0,0,.12);
+  ">
 
-<div class="app">
+    <div style="text-align:center;margin-bottom:25px;">
+      <h1 style="margin:0;color:#1d4ed8;">
+        Makkaoui
+      </h1>
+
+      <p style="margin:5px 0 0;color:#64748b;">
+        Management
+      </p>
+    </div>
+
+    <form id="loginForm">
+
+      <div style="margin-bottom:15px;">
+        <label>البريد الإلكتروني</label>
+
+        <input
+          type="email"
+          id="loginEmail"
+          required
+          placeholder="example@email.com"
+          style="
+            width:100%;
+            box-sizing:border-box;
+            padding:12px;
+            margin-top:7px;
+            border:1px solid #cbd5e1;
+            border-radius:10px;
+          "
+        >
+      </div>
+
+      <div style="margin-bottom:15px;">
+        <label>كلمة السر</label>
+
+        <input
+          type="password"
+          id="loginPassword"
+          required
+          placeholder="••••••••"
+          style="
+            width:100%;
+            box-sizing:border-box;
+            padding:12px;
+            margin-top:7px;
+            border:1px solid #cbd5e1;
+            border-radius:10px;
+          "
+        >
+      </div>
+
+      <p
+        id="loginError"
+        style="
+          display:none;
+          color:#dc2626;
+          background:#fee2e2;
+          padding:10px;
+          border-radius:8px;
+          margin:10px 0;
+        "
+      ></p>
+
+      <button
+        type="submit"
+        style="
+          width:100%;
+          padding:13px;
+          border:0;
+          border-radius:10px;
+          background:#1d4ed8;
+          color:white;
+          font-size:16px;
+          cursor:pointer;
+        "
+      >
+        دخول
+      </button>
+
+    </form>
+
+  </div>
+</div>
+<div class="app" style="display:none;">
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
@@ -3157,6 +3258,122 @@ function renderSalesChart(){
     });
 
 }
+  // ===============================
+// LOGIN / AUTHENTICATION
+// ===============================
+
+async function checkLogin(){
+
+  if(!supabaseClient){
+    console.error('Supabase غير مهيأ');
+    return;
+  }
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  const loginScreen =
+    document.getElementById('loginScreen');
+
+  const app =
+    document.querySelector('.app');
+
+  if(session){
+
+    if(loginScreen){
+      loginScreen.style.display = 'none';
+    }
+
+    if(app){
+      app.style.display = '';
+    }
+
+    renderAll();
+
+  }else{
+
+    if(loginScreen){
+      loginScreen.style.display = 'flex';
+    }
+
+    if(app){
+      app.style.display = 'none';
+    }
+
+  }
+}
+
+
+async function loginUser(){
+
+  const email =
+    document.getElementById('loginEmail').value.trim();
+
+  const password =
+    document.getElementById('loginPassword').value;
+
+  const errorBox =
+    document.getElementById('loginError');
+
+  errorBox.style.display = 'none';
+
+  const {
+    error
+  } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if(error){
+
+    errorBox.textContent =
+      'البريد الإلكتروني أو كلمة السر غير صحيحة';
+
+    errorBox.style.display = 'block';
+
+    return;
+  }
+
+  await checkLogin();
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  const loginForm =
+    document.getElementById('loginForm');
+
+  if(loginForm){
+
+    loginForm.addEventListener(
+      'submit',
+      function(event){
+
+        event.preventDefault();
+
+        loginUser();
+
+      }
+    );
+
+  }
+
+  if(supabaseClient){
+
+    supabaseClient.auth.onAuthStateChange(
+      function(){
+
+        checkLogin();
+
+      }
+    )
+
+    checkLogin();
+
+  }
+
+});
 function renderAll(){
 
   ensureCategoryOptions();
