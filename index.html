@@ -3146,9 +3146,77 @@ function renderSettings(){
   ).value =
     db.settings.minStock ?? 3;
 
+
+  // زر تسجيل الخروج
+  let logoutBtn =
+    document.getElementById('logoutBtn');
+
+  if(!logoutBtn){
+
+    logoutBtn =
+      document.createElement('button');
+
+    logoutBtn.id = 'logoutBtn';
+
+    logoutBtn.type = 'button';
+
+    logoutBtn.textContent =
+      '🚪 تسجيل الخروج';
+
+    logoutBtn.style.cssText = `
+      width:100%;
+      margin-top:20px;
+      padding:13px;
+      border:0;
+      border-radius:10px;
+      background:#dc2626;
+      color:white;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+    `;
+
+    logoutBtn.onclick =
+      logoutUser;
+
+    const settingsPage =
+      document.getElementById('settings');
+
+    if(settingsPage){
+      settingsPage.appendChild(logoutBtn);
+    }
+
+  }
+
 }
 
+// تسجيل الخروج من الحساب
+async function logoutUser(){
 
+  if(!supabaseClient) return;
+
+  const confirmed = confirm(
+    'واش متأكد بغيتي تسجل الخروج؟'
+  );
+
+  if(!confirmed) return;
+
+  const { error } =
+    await supabaseClient.auth.signOut();
+
+  if(error){
+
+    alert(
+      'وقع مشكل أثناء تسجيل الخروج'
+    );
+
+    console.error(error);
+
+    return;
+  }
+
+  checkLogin();
+}
 /* =========================================================
    RENDER ALL
 ========================================================= */
