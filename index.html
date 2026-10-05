@@ -560,6 +560,7 @@ th{
   }
 }
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -680,7 +681,15 @@ th{
 
     </div>
 
+    <div class="panel">
+      <div class="panel-head">
+        <h2>📈 تطور المبيعات</h2>
+      </div>
 
+      <div style="height:350px; padding:10px;">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
     <div class="panel">
 
       <div class="panel-head">
@@ -3068,11 +3077,94 @@ function ensureCategoryOptions(){
     .join('');
 
 }
+function renderSalesChart(){
+
+  const canvas =
+    document.getElementById('salesChart');
+
+  if(!canvas) return;
+
+  const sales = [...db.sales];
+
+  const grouped = {};
+
+  sales.forEach(sale => {
+
+    const date =
+      new Date(sale.date);
+
+    if(isNaN(date)) return;
+
+    const key =
+      date.toLocaleDateString('fr-MA');
+
+    if(!grouped[key]){
+      grouped[key] = 0;
+    }
+
+    grouped[key] +=
+      Number(sale.total || 0);
+
+  });
+
+  const labels =
+    Object.keys(grouped);
+
+  const values =
+    Object.values(grouped);
+
+  if(window.salesChartInstance){
+    window.salesChartInstance.destroy();
+  }
+
+  window.salesChartInstance =
+    new Chart(canvas, {
+
+      type:'line',
+
+      data:{
+        labels:labels,
+
+        datasets:[{
+          label:'المبيعات DH',
+          data:values,
+          tension:0.3,
+          fill:true
+        }]
+      },
+
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+
+        scales:{
+          y:{
+            beginAtZero:true,
+            title:{
+              display:true,
+              text:'المبيعات بالدرهم'
+            }
+          },
+
+          x:{
+            title:{
+              display:true,
+              text:'التاريخ'
+            }
+          }
+        }
+      }
+
+    });
+
+}  
 function renderAll(){
 
   ensureCategoryOptions();
 
   renderDashboard();
+
+  renderSalesChart();
 
   renderProductSelect();
 
