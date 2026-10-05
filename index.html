@@ -3090,28 +3090,27 @@ function renderSalesChart(){
 
   sales.forEach(sale => {
 
+    if(!sale.date) return;
+
     const date =
-      new Date(sale.date);
+      String(sale.date).slice(0,10);
 
-    if(isNaN(date)) return;
+    if(!date) return;
 
-    const key =
-      date.toLocaleDateString('fr-MA');
-
-    if(!grouped[key]){
-      grouped[key] = 0;
+    if(!grouped[date]){
+      grouped[date] = 0;
     }
 
-    grouped[key] +=
+    grouped[date] +=
       Number(sale.total || 0);
 
   });
 
-  const labels =
-    Object.keys(grouped);
+  const dates =
+    Object.keys(grouped).sort();
 
   const values =
-    Object.values(grouped);
+    dates.map(date => grouped[date]);
 
   if(window.salesChartInstance){
     window.salesChartInstance.destroy();
@@ -3123,7 +3122,7 @@ function renderSalesChart(){
       type:'line',
 
       data:{
-        labels:labels,
+        labels:dates,
 
         datasets:[{
           label:'المبيعات DH',
@@ -3157,7 +3156,7 @@ function renderSalesChart(){
 
     });
 
-}  
+}
 function renderAll(){
 
   ensureCategoryOptions();
