@@ -1616,7 +1616,32 @@ function blank(){
   };
 }
 
-function loadDB(){
+functiofunction loadDB(){
+
+  try{
+
+    const saved =
+      JSON.parse(
+        localStorage.getItem(KEY) || '{}'
+      );
+
+    return Object.assign(
+      blank(),
+      saved
+    );
+
+  }catch(error){
+
+    console.error(
+      'Local database error:',
+      error
+    );
+
+    return blank();
+
+  }
+
+}n loadDB(){
 
 /* =========================================================
    HELPERS
