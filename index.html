@@ -3139,16 +3139,26 @@ function renderReports(){
 /* =========================================================
    SETTINGS
 ========================================================= */
+
 function renderSettings(){
 
-  document.getElementById('shopName').value =
+  document.getElementById(
+    'shopName'
+  ).value =
     db.settings.shop || '';
 
-  document.getElementById('managerName').value =
+
+  document.getElementById(
+    'managerName'
+  ).value =
     db.settings.manager || '';
 
-  document.getElementById('minStock').value =
+
+  document.getElementById(
+    'minStock'
+  ).value =
     db.settings.minStock ?? 3;
+
 
   const capitalInput =
     document.getElementById('capital');
@@ -3160,8 +3170,98 @@ function renderSettings(){
 
   }
 
+
+  // زر تسجيل الخروج
+  let logoutBtn =
+    document.getElementById('logoutBtn');
+
+  if(!logoutBtn){
+
+    logoutBtn =
+      document.createElement('button');
+
+    logoutBtn.id =
+      'logoutBtn';
+
+    logoutBtn.type =
+      'button';
+
+    logoutBtn.textContent =
+      '🚪 تسجيل الخروج';
+
+    logoutBtn.style.cssText = `
+      width:100%;
+      margin-top:20px;
+      padding:13px;
+      border:0;
+      border-radius:10px;
+      background:#dc2626;
+      color:white;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+    `;
+
+    logoutBtn.onclick =
+      logoutUser;
+
+    const settingsPage =
+      document.getElementById('settings');
+
+    if(settingsPage){
+
+      settingsPage.appendChild(
+        logoutBtn
+      );
+
+    }
+
+  }
+
 }
 
+  // زر تسجيل الخروج
+  let logoutBtn =
+    document.getElementById('logoutBtn');
+
+  if(!logoutBtn){
+
+    logoutBtn =
+      document.createElement('button');
+
+    logoutBtn.id = 'logoutBtn';
+
+    logoutBtn.type = 'button';
+
+    logoutBtn.textContent =
+      '🚪 تسجيل الخروج';
+
+    logoutBtn.style.cssText = `
+      width:100%;
+      margin-top:20px;
+      padding:13px;
+      border:0;
+      border-radius:10px;
+      background:#dc2626;
+      color:white;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+    `;
+
+    logoutBtn.onclick =
+      logoutUser;
+
+    const settingsPage =
+      document.getElementById('settings');
+
+    if(settingsPage){
+      settingsPage.appendChild(logoutBtn);
+    }
+
+  }
+
+}
 
 // تسجيل الخروج من الحساب
 async function logoutUser(){
@@ -3189,8 +3289,8 @@ async function logoutUser(){
   }
 
   checkLogin();
-
-}========================
+}
+/* =========================================================
    RENDER ALL
 ========================================================= */
 function ensureCategoryOptions(){
