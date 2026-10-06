@@ -1605,25 +1605,16 @@ function blank(){
     customers:[],
     suppliers:[],
     payments:[],
-  settings:{
-  shop:'Makkaoui Clothes',
-  manager:'',
-  minStock:3,
-  capital:0
-}
-function loadDB(){
-  try{
-    const saved=JSON.parse(
-      localStorage.getItem(KEY) || '{}'
-    );
-    return Object.assign(blank(),saved);
-  }catch(error){
-    console.error('Local database error:',error);
-    return blank();
-  }
+    settings:{
+      shop:'Makkaoui Clothes',
+      manager:'',
+      minStock:3,
+      capital:0
+    }
+  };
 }
 
-let db=loadDB();
+function loadDB(){
 
 /* =========================================================
    HELPERS
