@@ -1647,11 +1647,6 @@ function loadDB(){
 /* =========================================================
    HELPERS
 ========================================================= */
-
-/* =========================================================
-   HELPERS
-========================================================= */
-
 function id(){
   return Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 }
@@ -3183,36 +3178,47 @@ function renderReports(){
 
 function renderSettings(){
 
-  document.getElementById(
-    'shopName'
-  ).value =
-    db.settings.shop || '';
+  /* معلومات المحل */
+  const shopName =
+    document.getElementById('shopName');
+
+  if(shopName){
+    shopName.value =
+      db.settings.shop || '';
+  }
 
 
-  document.getElementById(
-    'managerName'
-  ).value =
-    db.settings.manager || '';
+  /* اسم المسؤول */
+  const managerName =
+    document.getElementById('managerName');
+
+  if(managerName){
+    managerName.value =
+      db.settings.manager || '';
+  }
 
 
-  document.getElementById(
-    'minStock'
-  ).value =
-    db.settings.minStock ?? 3;
+  /* الحد الأدنى للمخزون */
+  const minStock =
+    document.getElementById('minStock');
+
+  if(minStock){
+    minStock.value =
+      db.settings.minStock ?? 3;
+  }
 
 
+  /* رأس مال المشروع */
   const capitalInput =
     document.getElementById('capital');
 
   if(capitalInput){
-
     capitalInput.value =
       db.settings.capital ?? 0;
-
   }
 
 
-  // زر تسجيل الخروج
+  /* زر تسجيل الخروج */
   let logoutBtn =
     document.getElementById('logoutBtn');
 
@@ -3255,49 +3261,6 @@ function renderSettings(){
         logoutBtn
       );
 
-    }
-
-  }
-
-}
-
-  // زر تسجيل الخروج
-  let logoutBtn =
-    document.getElementById('logoutBtn');
-
-  if(!logoutBtn){
-
-    logoutBtn =
-      document.createElement('button');
-
-    logoutBtn.id = 'logoutBtn';
-
-    logoutBtn.type = 'button';
-
-    logoutBtn.textContent =
-      '🚪 تسجيل الخروج';
-
-    logoutBtn.style.cssText = `
-      width:100%;
-      margin-top:20px;
-      padding:13px;
-      border:0;
-      border-radius:10px;
-      background:#dc2626;
-      color:white;
-      font-size:16px;
-      font-weight:bold;
-      cursor:pointer;
-    `;
-
-    logoutBtn.onclick =
-      logoutUser;
-
-    const settingsPage =
-      document.getElementById('settings');
-
-    if(settingsPage){
-      settingsPage.appendChild(logoutBtn);
     }
 
   }
