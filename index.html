@@ -1452,27 +1452,10 @@ th{
 
         <div class="form-grid">
 
-        <div class="field">
-  <label>اسم المحل</label>
+          <div class="field">
+            <label>اسم المحل</label>
 
-  <input id="shopName">
-</div>
-
-<div class="field">
-  <label>💰 رأس مال المشروع (DH)</label>
-
-  <input
-    id="capital"
-    type="number"
-    min="0"
-    step="0.01"
-    placeholder="مثال: 60000"
-  >
-
-  <small>
-    هذا المبلغ مستقل عن الأرباح والمبيعات.
-  </small>
-</div>
+            <input id="shopName">
           </div>
 
           <div class="field">
@@ -1610,43 +1593,29 @@ function blank(){
     settings:{
       shop:'Makkaoui Clothes',
       manager:'',
-      minStock:3,
-      capital:0
+      minStock:3
     }
   };
 }
 
 function loadDB(){
-
   try{
-
-    const saved =
-      JSON.parse(
-        localStorage.getItem(KEY) || '{}'
-      );
-
-    return Object.assign(
-      blank(),
-      saved
+    const saved=JSON.parse(
+      localStorage.getItem(KEY) || '{}'
     );
-
+    return Object.assign(blank(),saved);
   }catch(error){
-
-    console.error(
-      'Local database error:',
-      error
-    );
-
+    console.error('Local database error:',error);
     return blank();
-
   }
-
 }
 
+let db=loadDB();
 
 /* =========================================================
    HELPERS
 ========================================================= */
+
 function id(){
   return Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 }
@@ -1796,70 +1765,59 @@ async function loadCloudDB(showMessage=false){
 /* =========================================================
    NAVIGATION
 ========================================================= */
-function showPage(page, button){
+
+function showPage(page,button){
 
   document
     .querySelectorAll('.page')
     .forEach(
-      p => p.classList.remove('active')
+      p=>p.classList.remove('active')
     );
 
 
   const target =
     document.getElementById(page);
 
-
-  if(target){
+  if(target)
     target.classList.add('active');
-  }
 
 
   document
     .querySelectorAll('.nav button')
     .forEach(
-      b => b.classList.remove('active')
+      b=>b.classList.remove('active')
     );
 
 
-  if(button){
+  if(button)
     button.classList.add('active');
-  }
 
 
   const titles = {
 
-    dashboard: 'لوحة التحكم',
+    dashboard:'لوحة التحكم',
 
-    sales: 'المبيعات',
+    sales:'المبيعات',
 
-    products: 'المنتجات والمخزون',
+    products:'المنتجات والمخزون',
 
-    inventory: 'المنتجات والمخزون',
+    expenses:'المصاريف',
 
-    expenses: 'المصاريف',
+    customers:'الزبناء والديون',
 
-    customers: 'الزبناء والديون',
+    suppliers:'الموردون',
 
-    suppliers: 'الموردون',
+    reports:'التقارير',
 
-    reports: 'التقارير',
-
-    settings: 'الإعدادات'
+    settings:'الإعدادات'
 
   };
 
 
-  const pageTitle =
-    document.getElementById('pageTitle');
-
-
-  if(pageTitle){
-
-    pageTitle.textContent =
-      titles[page] ||
-      'Makkaoui Management';
-
-  }
+  document.getElementById(
+    'pageTitle'
+  ).textContent =
+    titles[page] || 'Makkaoui Management';
 
 
   renderAll();
@@ -1874,13 +1832,11 @@ function showPageByName(page){
       '.nav button'
     );
 
-
   let targetButton =
     null;
 
-
   buttons.forEach(
-    b => {
+    b=>{
 
       if(
         b.getAttribute('onclick')
@@ -1889,7 +1845,7 @@ function showPageByName(page){
           )
       ){
 
-        targetButton = b;
+        targetButton=b;
 
       }
 
@@ -1907,17 +1863,12 @@ function showPageByName(page){
 
 function toggleSidebar(){
 
-  const sidebar =
-    document.getElementById('sidebar');
-
-
-  if(sidebar){
-
-    sidebar.classList.toggle('open');
-
-  }
+  document
+    .getElementById('sidebar')
+    .classList.toggle('open');
 
 }
+
 
 /* =========================================================
    DASHBOARD
@@ -3178,47 +3129,25 @@ function renderReports(){
 
 function renderSettings(){
 
-  /* معلومات المحل */
-  const shopName =
-    document.getElementById('shopName');
-
-  if(shopName){
-    shopName.value =
-      db.settings.shop || '';
-  }
+  document.getElementById(
+    'shopName'
+  ).value =
+    db.settings.shop || '';
 
 
-  /* اسم المسؤول */
-  const managerName =
-    document.getElementById('managerName');
-
-  if(managerName){
-    managerName.value =
-      db.settings.manager || '';
-  }
+  document.getElementById(
+    'managerName'
+  ).value =
+    db.settings.manager || '';
 
 
-  /* الحد الأدنى للمخزون */
-  const minStock =
-    document.getElementById('minStock');
-
-  if(minStock){
-    minStock.value =
-      db.settings.minStock ?? 3;
-  }
+  document.getElementById(
+    'minStock'
+  ).value =
+    db.settings.minStock ?? 3;
 
 
-  /* رأس مال المشروع */
-  const capitalInput =
-    document.getElementById('capital');
-
-  if(capitalInput){
-    capitalInput.value =
-      db.settings.capital ?? 0;
-  }
-
-
-  /* زر تسجيل الخروج */
+  // زر تسجيل الخروج
   let logoutBtn =
     document.getElementById('logoutBtn');
 
@@ -3227,11 +3156,9 @@ function renderSettings(){
     logoutBtn =
       document.createElement('button');
 
-    logoutBtn.id =
-      'logoutBtn';
+    logoutBtn.id = 'logoutBtn';
 
-    logoutBtn.type =
-      'button';
+    logoutBtn.type = 'button';
 
     logoutBtn.textContent =
       '🚪 تسجيل الخروج';
@@ -3256,11 +3183,7 @@ function renderSettings(){
       document.getElementById('settings');
 
     if(settingsPage){
-
-      settingsPage.appendChild(
-        logoutBtn
-      );
-
+      settingsPage.appendChild(logoutBtn);
     }
 
   }
@@ -4195,12 +4118,7 @@ document
           ).value
         );
 
-db.settings.capital =
-  number(
-    document.getElementById(
-      'capital'
-    ).value
-  );
+
       await saveDB();
 
 
