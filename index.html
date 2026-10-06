@@ -1771,59 +1771,70 @@ async function loadCloudDB(showMessage=false){
 /* =========================================================
    NAVIGATION
 ========================================================= */
-
-function showPage(page,button){
+function showPage(page, button){
 
   document
     .querySelectorAll('.page')
     .forEach(
-      p=>p.classList.remove('active')
+      p => p.classList.remove('active')
     );
 
 
   const target =
     document.getElementById(page);
 
-  if(target)
+
+  if(target){
     target.classList.add('active');
+  }
 
 
   document
     .querySelectorAll('.nav button')
     .forEach(
-      b=>b.classList.remove('active')
+      b => b.classList.remove('active')
     );
 
 
-  if(button)
+  if(button){
     button.classList.add('active');
+  }
 
 
   const titles = {
 
-    dashboard:'لوحة التحكم',
+    dashboard: 'لوحة التحكم',
 
-    sales:'المبيعات',
+    sales: 'المبيعات',
 
-    products:'المنتجات والمخزون',
+    products: 'المنتجات والمخزون',
 
-    expenses:'المصاريف',
+    inventory: 'المنتجات والمخزون',
 
-    customers:'الزبناء والديون',
+    expenses: 'المصاريف',
 
-    suppliers:'الموردون',
+    customers: 'الزبناء والديون',
 
-    reports:'التقارير',
+    suppliers: 'الموردون',
 
-    settings:'الإعدادات'
+    reports: 'التقارير',
+
+    settings: 'الإعدادات'
 
   };
 
 
-  document.getElementById(
-    'pageTitle'
-  ).textContent =
-    titles[page] || 'Makkaoui Management';
+  const pageTitle =
+    document.getElementById('pageTitle');
+
+
+  if(pageTitle){
+
+    pageTitle.textContent =
+      titles[page] ||
+      'Makkaoui Management';
+
+  }
 
 
   renderAll();
@@ -1838,11 +1849,13 @@ function showPageByName(page){
       '.nav button'
     );
 
+
   let targetButton =
     null;
 
+
   buttons.forEach(
-    b=>{
+    b => {
 
       if(
         b.getAttribute('onclick')
@@ -1851,7 +1864,7 @@ function showPageByName(page){
           )
       ){
 
-        targetButton=b;
+        targetButton = b;
 
       }
 
@@ -1869,12 +1882,17 @@ function showPageByName(page){
 
 function toggleSidebar(){
 
-  document
-    .getElementById('sidebar')
-    .classList.toggle('open');
+  const sidebar =
+    document.getElementById('sidebar');
+
+
+  if(sidebar){
+
+    sidebar.classList.toggle('open');
+
+  }
 
 }
-
 
 /* =========================================================
    DASHBOARD
