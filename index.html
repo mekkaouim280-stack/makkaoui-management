@@ -1,169 +1,4267 @@
-<div class="panel">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <div class="panel-head">
+<title>Makkaoui Management</title>
 
-    <h2 id="productFormTitle">
-      إضافة منتوج جديد
-    </h2>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Arial,Tahoma,sans-serif;
+  background:#f5f7fb;
+  color:#172033;
+}
+
+button,input,select,textarea{
+  font-family:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.app{
+  min-height:100vh;
+  display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:250px;
+  background:#0f2f5f;
+  color:white;
+  position:fixed;
+  top:0;
+  right:0;
+  bottom:0;
+  z-index:100;
+  overflow-y:auto;
+}
+
+.logo{
+  padding:25px 20px;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.logo h1{
+  font-size:25px;
+  margin-bottom:6px;
+}
+
+.logo p{
+  font-size:12px;
+  opacity:.7;
+}
+
+.nav{
+  padding:15px 10px;
+}
+
+.nav button{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:white;
+  text-align:right;
+  padding:13px 15px;
+  margin-bottom:5px;
+  border-radius:10px;
+  font-size:15px;
+}
+
+.nav button:hover,
+.nav button.active{
+  background:#174982;
+}
+
+/* MAIN */
+.main{
+  width:calc(100% - 250px);
+  margin-right:250px;
+  padding:25px;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:25px;
+  gap:15px;
+}
+
+.topbar h2{
+  font-size:25px;
+}
+
+.mobile-menu{
+  display:none;
+}
+
+/* CARDS */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  margin-bottom:25px;
+}
+
+.card{
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  box-shadow:0 3px 15px rgba(0,0,0,.05);
+}
+
+.card-title{
+  color:#718096;
+  font-size:14px;
+  margin-bottom:10px;
+}
+
+.card-value{
+  font-size:25px;
+  font-weight:bold;
+}
+
+.card small{
+  display:block;
+  margin-top:7px;
+  color:#718096;
+}
+.cards .card:nth-child(1){
+  background:#15803d;
+  color:white;
+}
+
+.cards .card:nth-child(2){
+  background:#1d4ed8;
+  color:white;
+}
+
+.cards .card:nth-child(3){
+  background:#c2410c;
+  color:white;
+}
+
+.cards .card:nth-child(4){
+  background:#7e22ce;
+  color:white;
+}
+
+.cards .card:nth-child(5){
+  background:#166534;
+  color:white;
+}
+
+.cards .card:nth-child(6){
+  background:#b91c1c;
+  color:white;
+}
+
+.cards .card:nth-child(7){
+  background:#0e7490;
+  color:white;
+}
+
+.cards .card:nth-child(8){
+  background:#334155;
+  color:white;
+}
+  .cards .card:nth-child(1){
+  background:#15803d;
+  color:white;
+}
+
+.cards .card:nth-child(2){
+  background:#1d4ed8;
+  color:white;
+}
+
+.cards .card:nth-child(3){
+  background:#c2410c;
+  color:white;
+}
+
+.cards .card:nth-child(4){
+  background:#7e22ce;
+  color:white;
+}
+
+.cards .card:nth-child(5){
+  background:#166534;
+  color:white;
+}
+
+.cards .card:nth-child(6){
+  background:#b91c1c;
+  color:white;
+}
+
+.cards .card:nth-child(7){
+  background:#0e7490;
+  color:white;
+}
+
+.cards .card:nth-child(8){
+  background:#334155;
+  color:white;
+}
+  
+/* PANELS */
+.panel{
+  background:white;
+  border-radius:15px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 3px 15px rgba(0,0,0,.05);
+}
+.cards .card .card-title,
+.cards .card small{
+  color:white;
+}
+.panel-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.panel-head h2{
+  font-size:19px;
+}
+
+/* BUTTONS */
+.btn{
+  border:0;
+  border-radius:9px;
+  padding:10px 16px;
+  font-size:14px;
+}
+
+.btn-primary{
+  background:#1261a0;
+  color:white;
+}
+
+.btn-success{
+  background:#198754;
+  color:white;
+}
+
+.btn-danger{
+  background:#dc3545;
+  color:white;
+}
+
+.btn-secondary{
+  background:#e9eef5;
+  color:#26364d;
+}
+
+.btn-warning{
+  background:#f0ad00;
+  color:white;
+}
+
+/* FORMS */
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+.field label{
+  font-size:14px;
+  font-weight:bold;
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  border:1px solid #d8e0eb;
+  border-radius:9px;
+  padding:11px;
+  outline:none;
+  background:white;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color:#1261a0;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+/* TABLE */
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+}
+
+th,td{
+  padding:12px;
+  border-bottom:1px solid #edf0f5;
+  text-align:right;
+  font-size:14px;
+}
+
+th{
+  background:#f8fafc;
+  color:#526174;
+}
+
+.empty{
+  text-align:center;
+  color:#8793a3;
+  padding:30px;
+}
+
+/* BADGES */
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+}
+
+.badge-green{
+  background:#dff5e8;
+  color:#137a3d;
+}
+
+.badge-red{
+  background:#fde2e4;
+  color:#b42332;
+}
+
+.badge-yellow{
+  background:#fff1cc;
+  color:#8a6200;
+}
+
+/* ACTIONS */
+.actions{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+}
+
+.actions button{
+  padding:7px 10px;
+  border:0;
+  border-radius:7px;
+  font-size:12px;
+}
+
+/* PRODUCT GRID */
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+}
+
+.product-card{
+  border:1px solid #e4e9f0;
+  border-radius:12px;
+  padding:15px;
+}
+
+.product-card h3{
+  margin-bottom:8px;
+}
+
+.product-meta{
+  color:#667085;
+  font-size:13px;
+  line-height:1.8;
+}
+
+/* SEARCH */
+.search-row{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.search-row input,
+.search-row select{
+  padding:11px;
+  border:1px solid #d8e0eb;
+  border-radius:9px;
+  outline:none;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:500;
+  padding:20px;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  background:white;
+  width:min(800px,100%);
+  max-height:90vh;
+  overflow-y:auto;
+  border-radius:15px;
+  padding:25px;
+}
+
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+
+.close{
+  border:0;
+  background:#eee;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  background:#172033;
+  color:white;
+  padding:13px 18px;
+  border-radius:10px;
+  display:none;
+  z-index:1000;
+  box-shadow:0 5px 20px rgba(0,0,0,.2);
+}
+
+.toast.show{
+  display:block;
+}
+
+/* HIDDEN */
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+/* RESPONSIVE */
+@media(max-width:1000px){
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .product-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:700px){
+
+  .sidebar{
+    transform:translateX(100%);
+    transition:.25s;
+  }
+
+  .sidebar.open{
+    transform:translateX(0);
+  }
+
+  .main{
+    width:100%;
+    margin-right:0;
+    padding:15px;
+  }
+
+  .mobile-menu{
+    display:block;
+    border:0;
+    background:#0f2f5f;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+  }
+
+  .topbar h2{
+    font-size:20px;
+  }
+
+  .cards{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .card{
+    padding:14px;
+  }
+
+  .card-value{
+    font-size:20px;
+  }
+  .cards .card .card-title,
+.cards .card small{
+  color:white;
+}
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .product-grid{
+    grid-template-columns:1fr;
+  }
+
+  .search-row{
+    flex-direction:column;
+  }
+}
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="
+  position:fixed;
+  inset:0;
+  background:#f1f5f9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+  direction:rtl;
+">
+  <div style="
+    width:100%;
+    max-width:400px;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 10px 35px rgba(0,0,0,.12);
+  ">
+
+    <div style="text-align:center;margin-bottom:25px;">
+      <h1 style="margin:0;color:#1d4ed8;">
+        Makkaoui
+      </h1>
+
+      <p style="margin:5px 0 0;color:#64748b;">
+        Management
+      </p>
+    </div>
+
+    <form id="loginForm">
+
+      <div style="margin-bottom:15px;">
+        <label>البريد الإلكتروني</label>
+
+        <input
+          type="email"
+          id="loginEmail"
+          required
+          placeholder="example@email.com"
+          style="
+            width:100%;
+            box-sizing:border-box;
+            padding:12px;
+            margin-top:7px;
+            border:1px solid #cbd5e1;
+            border-radius:10px;
+          "
+        >
+      </div>
+
+      <div style="margin-bottom:15px;">
+        <label>كلمة السر</label>
+
+        <input
+          type="password"
+          id="loginPassword"
+          required
+          placeholder="••••••••"
+          style="
+            width:100%;
+            box-sizing:border-box;
+            padding:12px;
+            margin-top:7px;
+            border:1px solid #cbd5e1;
+            border-radius:10px;
+          "
+        >
+      </div>
+
+      <p
+        id="loginError"
+        style="
+          display:none;
+          color:#dc2626;
+          background:#fee2e2;
+          padding:10px;
+          border-radius:8px;
+          margin:10px 0;
+        "
+      ></p>
+
+      <button
+        type="submit"
+        style="
+          width:100%;
+          padding:13px;
+          border:0;
+          border-radius:10px;
+          background:#1d4ed8;
+          color:white;
+          font-size:16px;
+          cursor:pointer;
+        "
+      >
+        دخول
+      </button>
+
+    </form>
 
   </div>
+</div>
+<div class="app" style="display:none;">
 
-  <form id="productForm">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
 
-    <input type="hidden" id="productId">
+  <div class="logo">
+    <h1>Makkaoui</h1>
+    <p>Management</p>
+  </div>
 
-    <div class="form-grid">
+  <div class="nav">
 
-      <div class="field">
-        <label>اسم المنتوج *</label>
+    <button class="active" onclick="showPage('dashboard',this)">
+      🏠 لوحة التحكم
+    </button>
 
-        <input id="pName"
-               required
-               placeholder="مثال: سروال كلاس">
+    <button onclick="showPage('sales',this)">
+      🛒 المبيعات
+    </button>
+
+    <button onclick="showPage('products',this)">
+      📦 المنتجات والمخزون
+    </button>
+
+    <button onclick="showPage('expenses',this)">
+      💸 المصاريف
+    </button>
+
+    <button onclick="showPage('customers',this)">
+      👥 الزبناء والديون
+    </button>
+
+    <button onclick="showPage('suppliers',this)">
+      🚚 الموردون
+    </button>
+
+    <button onclick="showPage('reports',this)">
+      📊 التقارير
+    </button>
+
+    <button onclick="showPage('settings',this)">
+      ⚙️ الإعدادات
+    </button>
+
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="topbar">
+    <div>
+      <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+    </div>
+
+    <div>
+      <h2 id="pageTitle">لوحة التحكم</h2>
+    </div>
+  </div>
+
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="page active">
+
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-title">إجمالي المبيعات</div>
+        <div class="card-value" id="dashSales">0 DH</div>
+        <small>إجمالي قيمة المبيعات</small>
       </div>
 
-
-      <div class="field">
-
-        <label>الصنف *</label>
-
-        <select id="pCategory" required>
-
-          <option value="سراويل">سراويل</option>
-
-          <option value="تيشورتات">
-            تيشورتات
-          </option>
-
-          <option value="قمصان">
-            قمصان
-          </option>
-
-          <option value="سبرديلات">
-            سبرديلات
-          </option>
-
-          <option value="جاكيتات">
-            جاكيتات
-          </option>
-
-          <option value="أخرى">
-            أخرى
-          </option>
-
-        </select>
-
+      <div class="card">
+        <div class="card-title">الربح الإجمالي</div>
+        <div class="card-value" id="dashGross">0 DH</div>
+        <small>المبيعات ناقص تكلفة السلع</small>
       </div>
 
-
-      <div class="field">
-
-        <label>ثمن الشراء</label>
-
-        <input id="pCost"
-               type="number"
-               step="0.01"
-               min="0"
-               value="0">
-
+      <div class="card">
+        <div class="card-title">المصاريف</div>
+        <div class="card-value" id="dashExpenses">0 DH</div>
+        <small>مصاريف المحل</small>
       </div>
 
-
-      <div class="field">
-
-        <label>ثمن البيع</label>
-
-        <input id="pPrice"
-               type="number"
-               step="0.01"
-               min="0"
-               value="0">
-
+      <div class="card">
+        <div class="card-title">الربح الصافي</div>
+        <div class="card-value" id="dashNet">0 DH</div>
+        <small>الربح بعد المصاريف</small>
       </div>
 
-
-      <div class="field">
-
-        <label>الكمية</label>
-
-        <input id="pQty"
-               type="number"
-               min="0"
-               value="0">
-
+      <div class="card">
+        <div class="card-title">المبلغ المحصل</div>
+        <div class="card-value" id="dashCollected">0 DH</div>
+        <small>الفلوس اللي تخلصات</small>
       </div>
 
+      <div class="card">
+        <div class="card-title">ديون الزبناء</div>
+        <div class="card-value" id="dashDebt">0 DH</div>
+        <small>المبالغ المتبقية</small>
+      </div>
 
-      <div class="field">
+      <div class="card">
+        <div class="card-title">قيمة المخزون</div>
+        <div class="card-value" id="dashStock">0 DH</div>
+        <small>حسب تكلفة الشراء</small>
+      </div>
 
-        <label>الحد الأدنى للمخزون</label>
+      <div class="card">
+        <div class="card-title">عدد المبيعات</div>
+        <div class="card-value" id="dashCount">0</div>
+        <small>عدد العمليات</small>
+      </div>
 
-        <input id="pMin"
-               type="number"
-               min="0"
-               value="3">
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>📈 تطور المبيعات</h2>
+      </div>
+
+      <div style="height:350px; padding:10px;">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>آخر المبيعات</h2>
+
+        <button class="btn btn-primary"
+                onclick="showPageByName('sales')">
+          عرض جميع المبيعات
+        </button>
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>الزبون</th>
+              <th>المبلغ</th>
+              <th>المؤدى</th>
+              <th>الباقي</th>
+            </tr>
+          </thead>
+
+          <tbody id="recentSales"></tbody>
+
+        </table>
 
       </div>
 
     </div>
 
-    <br>
+  </section>
 
-    <div class="actions">
+
+  <!-- SALES -->
+  <section id="sales" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>إضافة عملية بيع</h2>
+      </div>
+
+      <form id="saleForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>الزبون</label>
+            <input id="saleCustomer"
+                   placeholder="اسم الزبون">
+          </div>
+
+          <div class="field">
+            <label>طريقة الأداء</label>
+
+            <select id="salePaymentMethod">
+              <option value="cash">نقداً</option>
+              <option value="transfer">تحويل بنكي</option>
+              <option value="card">بطاقة</option>
+              <option value="credit">دين</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>المنتوج</label>
+
+            <select id="saleProduct">
+              <option value="">اختار المنتوج</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>الكمية</label>
+
+            <input id="saleQty"
+                   type="number"
+                   min="1"
+                   value="1">
+          </div>
+
+          <div class="field">
+            <label>ثمن البيع للوحدة</label>
+
+            <input id="salePrice"
+                   type="number"
+                   step="0.01"
+                   min="0">
+          </div>
+
+          <div class="field">
+            <label>المبلغ المؤدى</label>
+
+            <input id="salePaid"
+                   type="number"
+                   step="0.01"
+                   min="0"
+                   value="0">
+          </div>
+
+          <div class="field full">
+            <label>ملاحظات</label>
+
+            <textarea id="saleNotes"></textarea>
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-success" type="submit">
+          تسجيل البيع
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>المبيعات</h2>
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>الزبون</th>
+              <th>المنتوج</th>
+              <th>الكمية</th>
+              <th>الإجمالي</th>
+              <th>المؤدى</th>
+              <th>الباقي</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+
+          <tbody id="salesTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- PRODUCTS -->
+  <section id="products" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+
+        <h2 id="productFormTitle">
+          إضافة منتوج جديد
+        </h2>
+
+      </div>
+
+      <form id="productForm">
+
+        <input type="hidden" id="productId">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>اسم المنتوج *</label>
+
+            <input id="pName"
+                   required
+                   placeholder="مثال: سروال كلاس">
+          </div>
+
+
+          <div class="field">
+
+            <label>الصنف *</label>
+
+            <select id="pCategory" required>
+
+              <option value="سراويل">سراويل</option>
+
+              <option value="تيشورتات">
+                تيشورتات
+              </option>
+
+              <option value="قمصان">
+                قمصان
+              </option>
+
+              <option value="سبرديلات">
+                سبرديلات
+              </option>
+
+              <option value="جاكيتات">
+                جاكيتات
+              </option>
+
+              <option value="أخرى">
+                أخرى
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>ثمن الشراء</label>
+
+            <input id="pCost"
+                   type="number"
+                   step="0.01"
+                   min="0"
+                   value="0">
+
+          </div>
+
+
+          <div class="field">
+
+            <label>ثمن البيع</label>
+
+            <input id="pPrice"
+                   type="number"
+                   step="0.01"
+                   min="0"
+                   value="0">
+
+          </div>
+
+
+          <div class="field">
+
+            <label>الكمية</label>
+
+            <input id="pQty"
+                   type="number"
+                   min="0"
+                   value="0">
+
+          </div>
+
+
+          <div class="field">
+
+            <label>الحد الأدنى للمخزون</label>
+
+            <input id="pMin"
+                   type="number"
+                   min="0"
+                   value="3">
+
+          </div>
+
+        </div>
+
+        <br>
+
+        <div class="actions">
+
+          <button class="btn btn-primary"
+                  type="submit">
+            حفظ المنتوج
+          </button>
+
+          <button class="btn btn-secondary"
+                  type="button"
+                  onclick="resetProductForm()">
+            إلغاء
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+
+        <h2>المخزون</h2>
+
+        <input id="productSearch"
+               placeholder="بحث عن منتوج..."
+               oninput="renderProducts()">
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>المنتوج</th>
+              <th>الصنف</th>
+              <th>الشراء</th>
+              <th>البيع</th>
+              <th>الكمية</th>
+              <th>قيمة المخزون</th>
+              <th>الحالة</th>
+              <th>إجراء</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="productsTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- EXPENSES -->
+  <section id="expenses" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>إضافة مصروف</h2>
+      </div>
+
+      <form id="expenseForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>نوع المصروف</label>
+
+            <input id="expenseName"
+                   required
+                   placeholder="مثال: إعلانات">
+          </div>
+
+          <div class="field">
+            <label>المبلغ</label>
+
+            <input id="expenseAmount"
+                   type="number"
+                   step="0.01"
+                   min="0"
+                   required>
+          </div>
+
+          <div class="field full">
+            <label>ملاحظات</label>
+
+            <textarea id="expenseNotes"></textarea>
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-success">
+          تسجيل المصروف
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>المصاريف</h2>
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>المصروف</th>
+              <th>المبلغ</th>
+              <th>ملاحظات</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+
+          <tbody id="expensesTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- CUSTOMERS -->
+  <section id="customers" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>الزبناء والديون</h2>
+      </div>
+
+      <form id="customerForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>اسم الزبون</label>
+
+            <input id="customerName"
+                   required>
+          </div>
+
+          <div class="field">
+            <label>الهاتف</label>
+
+            <input id="customerPhone">
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-success">
+          إضافة الزبون
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>الزبون</th>
+              <th>الهاتف</th>
+              <th>المبيعات</th>
+              <th>الأداء</th>
+              <th>الدين</th>
+              <th>إجراء</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="customersTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SUPPLIERS -->
+  <section id="suppliers" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>إضافة مورد</h2>
+      </div>
+
+      <form id="supplierForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>اسم المورد</label>
+
+            <input id="supplierName"
+                   required>
+          </div>
+
+          <div class="field">
+            <label>الهاتف</label>
+
+            <input id="supplierPhone">
+          </div>
+
+          <div class="field full">
+            <label>ملاحظات</label>
+
+            <textarea id="supplierNotes"></textarea>
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-success">
+          إضافة المورد
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>المورد</th>
+              <th>الهاتف</th>
+              <th>ملاحظات</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+
+          <tbody id="suppliersTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- REPORTS -->
+  <section id="reports" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>التقارير المالية</h2>
+      </div>
+
+      <div class="cards">
+
+        <div class="card">
+          <div class="card-title">
+            المبيعات
+          </div>
+
+          <div class="card-value"
+               id="reportSales">
+            0 DH
+          </div>
+        </div>
+
+
+        <div class="card">
+          <div class="card-title">
+            تكلفة البضاعة
+          </div>
+
+          <div class="card-value"
+               id="reportCost">
+            0 DH
+          </div>
+        </div>
+
+
+        <div class="card">
+          <div class="card-title">
+            الربح الإجمالي
+          </div>
+
+          <div class="card-value"
+               id="reportGross">
+            0 DH
+          </div>
+        </div>
+
+
+        <div class="card">
+          <div class="card-title">
+            الربح الصافي
+          </div>
+
+          <div class="card-value"
+               id="reportNet">
+            0 DH
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>ملخص المخزون</h2>
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>المنتوج</th>
+              <th>الكمية</th>
+              <th>قيمة الشراء</th>
+              <th>قيمة البيع</th>
+              <th>الربح المحتمل</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="reportStock"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- SETTINGS -->
+  <section id="settings" class="page">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>إعدادات المحل</h2>
+      </div>
+
+      <form id="settingsForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+            <label>اسم المحل</label>
+
+            <input id="shopName">
+          </div>
+
+          <div class="field">
+            <label>اسم المسؤول</label>
+
+            <input id="managerName">
+          </div>
+
+          <div class="field">
+            <label>الحد الأدنى الافتراضي للمخزون</label>
+
+            <input id="minStock"
+                   type="number"
+                   min="0">
+          </div>
+
+        </div>
+
+        <br>
+
+        <button class="btn btn-primary">
+          حفظ الإعدادات
+        </button>
+
+      </form>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>النسخ الاحتياطي</h2>
+      </div>
+
+      <div class="actions">
+
+        <button class="btn btn-success"
+                onclick="exportBackup()">
+          تحميل نسخة احتياطية
+        </button>
+
+        <button class="btn btn-secondary"
+                onclick="document.getElementById('backupFile').click()">
+          استرجاع نسخة
+        </button>
+
+        <input type="file"
+               id="backupFile"
+               accept=".json"
+               style="display:none"
+               onchange="importBackup(event)">
+
+      </div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <h2>المزامنة السحابية</h2>
+      </div>
+
+      <p style="line-height:2;color:#667085">
+        البيانات كتتحفظ محلياً فالمتصفح، وكتتم محاولة مزامنتها
+        كذلك مع Supabase.
+      </p>
+
+      <br>
 
       <button class="btn btn-primary"
-              type="submit">
-        حفظ المنتوج
-      </button>
-
-      <button class="btn btn-secondary"
-              type="button"
-              onclick="resetProductForm()">
-        إلغاء
+              onclick="loadCloudDB(true)">
+        ☁️ مزامنة الآن
       </button>
 
     </div>
 
-  </form>
+  </section>
+
+</main>
 
 </div>
 
 
-<div class="panel">
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-  <div class="panel-head">
 
-    <h2>المخزون</h2>
+<script>
 
-    <input id="productSearch"
-           placeholder="بحث عن منتوج..."
-           oninput="renderProducts()">
+/* =========================================================
+   SUPABASE
+========================================================= */
 
-  </div>
+const SUPABASE_URL =
+'https://lxidsrwfwxrbdqyyjezd.supabase.co';
 
-  <div class="table-wrap">
+const SUPABASE_PUBLISHABLE_KEY =
+'sb_publishable_NzoLeXzSFHerv3Ehmz_B-A_clNpchjh';
 
-    <table>
+let supabaseClient = null;
 
-      <thead>
+try{
+  if(window.supabase && SUPABASE_PUBLISHABLE_KEY !== 'YOUR_PUBLISHABLE_KEY'){
+    supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+  }
+}catch(error){
+  console.error('Supabase initialization error:', error);
+}
 
+/* =========================================================
+   LOCAL DATABASE
+========================================================= */
+
+const KEY='makkaoui_management_v1';
+function getCustomerDebt(customerId){
+  return db.sales
+    .filter(s => s.customerId === customerId)
+    .reduce((total, s) => {
+      return total + (number(s.total) - number(s.paid));
+    }, 0);
+}
+function blank(){
+  return {
+    products:[],
+    sales:[],
+    expenses:[],
+    customers:[],
+    suppliers:[],
+    payments:[],
+    settings:{
+      shop:'Makkaoui Clothes',
+      manager:'',
+      minStock:3
+    }
+  };
+}
+
+function loadDB(){
+  try{
+    const saved=JSON.parse(
+      localStorage.getItem(KEY) || '{}'
+    );
+    return Object.assign(blank(),saved);
+  }catch(error){
+    console.error('Local database error:',error);
+    return blank();
+  }
+}
+
+let db=loadDB();
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function id(){
+  return Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+}
+
+function money(value){
+  return Number(value || 0).toLocaleString('fr-MA',{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  })+' DH';
+}
+
+function number(value){
+  return Number(value || 0);
+}
+
+function dateNow(){
+  return new Date().toISOString();
+}
+
+function formatDate(value){
+  if(!value) return '';
+  return new Date(value).toLocaleDateString('fr-MA');
+}
+
+function escapeHtml(value){
+  return String(value ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+function toast(message){
+  const el=document.getElementById('toast');
+  if(!el) return;
+  el.textContent=message;
+  el.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>{
+    el.classList.remove('show');
+  },3000);
+}
+
+/* =========================================================
+   SAVE LOCAL + CLOUD
+========================================================= */
+
+async function saveDB(){
+  localStorage.setItem(KEY,JSON.stringify(db));
+  renderAll();
+
+  if(!supabaseClient){
+    return;
+  }
+
+  try{
+    const {error}=await supabaseClient
+      .from('app_state')
+      .upsert({
+        id:1,
+        data:db,
+        updated_at:new Date().toISOString()
+      });
+
+    if(error) throw error;
+
+    console.log('Cloud sync: OK');
+  }catch(error){
+    console.error('Cloud sync error:',error);
+    toast('تحفظات محلياً، ولكن Cloud ما تخدماتش');
+  }
+}
+
+async function loadCloudDB(showMessage=false){
+  if(!supabaseClient){
+    if(showMessage) toast('تعذر الاتصال بـ Supabase');
+    return;
+  }
+
+  try{
+    const {data,error}=await supabaseClient
+      .from('app_state')
+      .select('data')
+      .eq('id',1)
+      .maybeSingle();
+
+    if(error) throw error;
+
+    const hasLocalData =
+      db.products.length>0 ||
+      db.sales.length>0 ||
+      db.expenses.length>0 ||
+      db.customers.length>0 ||
+      db.suppliers.length>0;
+
+    if(hasLocalData){
+      const {error:upsertError}=await supabaseClient
+        .from('app_state')
+        .upsert({
+          id:1,
+          data:db,
+          updated_at:new Date().toISOString()
+        });
+
+      if(upsertError) throw upsertError;
+
+      localStorage.setItem(KEY,JSON.stringify(db));
+
+      if(showMessage)
+        toast('تمت مزامنة البيانات المحلية مع السحابة ☁️');
+
+      return;
+    }
+
+    if(data && data.data){
+      db=Object.assign(blank(),data.data);
+      localStorage.setItem(KEY,JSON.stringify(db));
+      renderAll();
+
+      if(showMessage)
+        toast('تم تحميل البيانات من السحابة ☁️');
+
+      return;
+    }
+
+    const {error:insertError}=await supabaseClient
+      .from('app_state')
+      .upsert({
+        id:1,
+        data:db,
+        updated_at:new Date().toISOString()
+      });
+
+    if(insertError) throw insertError;
+
+    if(showMessage)
+      toast('تم إنشاء قاعدة البيانات السحابية ☁️');
+
+  }catch(error){
+    console.error('Cloud load error:',error);
+    if(showMessage)
+      toast('خدام محلياً — تعذر الاتصال بالسحابة');
+  }
+}
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function showPage(page,button){
+
+  document
+    .querySelectorAll('.page')
+    .forEach(
+      p=>p.classList.remove('active')
+    );
+
+
+  const target =
+    document.getElementById(page);
+
+  if(target)
+    target.classList.add('active');
+
+
+  document
+    .querySelectorAll('.nav button')
+    .forEach(
+      b=>b.classList.remove('active')
+    );
+
+
+  if(button)
+    button.classList.add('active');
+
+
+  const titles = {
+
+    dashboard:'لوحة التحكم',
+
+    sales:'المبيعات',
+
+    products:'المنتجات والمخزون',
+
+    expenses:'المصاريف',
+
+    customers:'الزبناء والديون',
+
+    suppliers:'الموردون',
+
+    reports:'التقارير',
+
+    settings:'الإعدادات'
+
+  };
+
+
+  document.getElementById(
+    'pageTitle'
+  ).textContent =
+    titles[page] || 'Makkaoui Management';
+
+
+  renderAll();
+
+}
+
+
+function showPageByName(page){
+
+  const buttons =
+    document.querySelectorAll(
+      '.nav button'
+    );
+
+  let targetButton =
+    null;
+
+  buttons.forEach(
+    b=>{
+
+      if(
+        b.getAttribute('onclick')
+          ?.includes(
+            `'${page}'`
+          )
+      ){
+
+        targetButton=b;
+
+      }
+
+    }
+  );
+
+
+  showPage(
+    page,
+    targetButton
+  );
+
+}
+
+
+function toggleSidebar(){
+
+  document
+    .getElementById('sidebar')
+    .classList.toggle('open');
+
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function calculateStats(){
+
+  let sales = 0;
+
+  let cost = 0;
+
+  let paid = 0;
+
+
+  db.sales.forEach(
+    sale=>{
+
+      sales +=
+        number(sale.total);
+
+      paid +=
+        number(sale.paid);
+
+      cost +=
+        number(sale.cost);
+
+    }
+  );
+
+
+  let expenses = 0;
+
+  db.expenses.forEach(
+    e=>{
+      expenses +=
+        number(e.amount);
+    }
+  );
+
+
+  const gross =
+    sales - cost;
+
+  const net =
+    gross - expenses;
+
+  const debt =
+    sales - paid;
+
+
+  let stockValue = 0;
+
+  db.products.forEach(
+    p=>{
+
+      stockValue +=
+        number(p.qty)
+        *
+        number(p.cost);
+
+    }
+  );
+
+
+  return {
+
+    sales,
+
+    cost,
+
+    gross,
+
+    expenses,
+
+    net,
+
+    paid,
+
+    debt,
+
+    stockValue,
+
+    count:db.sales.length
+
+  };
+
+}
+
+
+function renderDashboard(){
+
+  const s =
+    calculateStats();
+
+
+  document.getElementById(
+    'dashSales'
+  ).textContent =
+    money(s.sales);
+
+
+  document.getElementById(
+    'dashGross'
+  ).textContent =
+    money(s.gross);
+
+
+  document.getElementById(
+    'dashExpenses'
+  ).textContent =
+    money(s.expenses);
+
+
+  document.getElementById(
+    'dashNet'
+  ).textContent =
+    money(s.net);
+
+
+  document.getElementById(
+    'dashCollected'
+  ).textContent =
+    money(s.paid);
+
+
+  document.getElementById(
+    'dashDebt'
+  ).textContent =
+    money(s.debt);
+
+
+  document.getElementById(
+    'dashStock'
+  ).textContent =
+    money(s.stockValue);
+
+
+  document.getElementById(
+    'dashCount'
+  ).textContent =
+    s.count;
+
+
+  const tbody =
+    document.getElementById(
+      'recentSales'
+    );
+
+
+  const sales =
+    [...db.sales]
+      .sort(
+        (a,b)=>
+          new Date(b.date)
+          -
+          new Date(a.date)
+      )
+      .slice(0,8);
+
+
+  if(!sales.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="5" class="empty">
+          لا توجد مبيعات بعد
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    sales.map(
+      sale=>{
+
+        const remaining =
+          number(sale.total)
+          -
+          number(sale.paid);
+
+
+        return `
         <tr>
-          <th>المنتوج</th>
-          <th>الصنف</th>
-          <th>الشراء</th>
-          <th>البيع</th>
-          <th>الكمية</th>
-          <th>قيمة المخزون</th>
-          <th>الحالة</th>
-          <th>إجراء</th>
+
+          <td>
+            ${formatDate(sale.date)}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              sale.customer || 'زبون'
+            )}
+          </td>
+
+          <td>
+            ${money(sale.total)}
+          </td>
+
+          <td>
+            ${money(sale.paid)}
+          </td>
+
+          <td>
+            ${
+              remaining > 0
+              ?
+              `<span class="badge badge-red">
+                ${money(remaining)}
+              </span>`
+              :
+              `<span class="badge badge-green">
+                مؤدى
+              </span>`
+            }
+          </td>
+
         </tr>
+        `;
 
-      </thead>
+      }
+    ).join('');
 
-      <tbody id="productsTable"></tbody>
+}
 
-    </table>
 
-  </div>
+/* =========================================================
+   PRODUCTS
+========================================================= */
 
-</div>
+function renderProductSelect(){
+
+  const select =
+    document.getElementById(
+      'saleProduct'
+    );
+
+
+  const current =
+    select.value;
+
+
+  select.innerHTML =
+    `<option value="">
+      اختار المنتوج
+    </option>`
+    +
+    db.products.map(
+      p=>`
+        <option value="${p.id}">
+          ${escapeHtml(p.name)}
+          — ${money(p.price)}
+        </option>
+      `
+    ).join('');
+
+
+  if(
+    db.products.some(
+      p=>p.id===current
+    )
+  ){
+
+    select.value =
+      current;
+
+  }
+
+}
+
+
+function renderProducts(){
+
+  const tbody =
+    document.getElementById(
+      'productsTable'
+    );
+
+
+  const search =
+    (
+      document.getElementById(
+        'productSearch'
+      )?.value || ''
+    )
+    .trim()
+    .toLowerCase();
+
+
+  const products =
+    db.products.filter(
+      p=>
+        !search ||
+        String(p.name)
+          .toLowerCase()
+          .includes(search) ||
+        String(p.category)
+          .toLowerCase()
+          .includes(search)
+    );
+
+
+  if(!products.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="8" class="empty">
+          لا توجد منتجات
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    products.map(
+      p=>{
+
+        const qty =
+          number(p.qty);
+
+        const value =
+          qty *
+          number(p.cost);
+
+        const min =
+          number(
+            p.minStock ??
+            db.settings.minStock
+          );
+
+
+        const status =
+          qty <= min
+          ?
+          `<span class="badge badge-red">
+             مخزون ضعيف
+           </span>`
+          :
+          `<span class="badge badge-green">
+             جيد
+           </span>`;
+
+
+        return `
+        <tr>
+
+          <td>
+            <strong>
+              ${escapeHtml(p.name)}
+            </strong>
+          </td>
+
+          <td>
+            ${escapeHtml(p.category)}
+          </td>
+
+          <td>
+            ${money(p.cost)}
+          </td>
+
+          <td>
+            ${money(p.price)}
+          </td>
+
+          <td>
+            ${qty}
+          </td>
+
+          <td>
+            ${money(value)}
+          </td>
+
+          <td>
+            ${status}
+          </td>
+
+          <td>
+
+            <div class="actions">
+
+              <button
+                class="btn-secondary"
+                onclick="editProduct('${p.id}')">
+                تعديل
+              </button>
+
+              <button
+                class="btn-danger"
+                onclick="deleteProduct('${p.id}')">
+                حذف
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+        `;
+
+      }
+    ).join('');
+
+}
+
+
+function resetProductForm(){
+
+  document.getElementById(
+    'productForm'
+  ).reset();
+
+
+  document.getElementById(
+    'productId'
+  ).value='';
+
+
+  document.getElementById(
+    'productFormTitle'
+  ).textContent =
+    'إضافة منتوج جديد';
+
+
+  document.getElementById(
+    'pMin'
+  ).value =
+    db.settings.minStock || 3;
+
+}
+
+
+function editProduct(productId){
+
+  const p =
+    db.products.find(
+      x=>x.id===productId
+    );
+
+
+  if(!p) return;
+
+
+  document.getElementById(
+    'productId'
+  ).value =
+    p.id;
+
+
+  document.getElementById(
+    'pName'
+  ).value =
+    p.name;
+
+
+  document.getElementById(
+    'pCategory'
+  ).value =
+    p.category;
+
+
+  document.getElementById(
+    'pCost'
+  ).value =
+    p.cost;
+
+
+  document.getElementById(
+    'pPrice'
+  ).value =
+    p.price;
+
+
+  document.getElementById(
+    'pQty'
+  ).value =
+    p.qty;
+
+
+  document.getElementById(
+    'pMin'
+  ).value =
+    p.minStock ??
+    db.settings.minStock;
+
+
+  document.getElementById(
+    'productFormTitle'
+  ).textContent =
+    'تعديل المنتوج';
+
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+}
+
+
+async function deleteProduct(productId){
+
+  const p =
+    db.products.find(
+      x=>x.id===productId
+    );
+
+
+  if(!p) return;
+
+
+  if(
+    !confirm(
+      `واش متأكد بلي بغيتي تحذف "${p.name}"؟`
+    )
+  )
+    return;
+
+
+  db.products =
+    db.products.filter(
+      x=>x.id!==productId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف المنتوج');
+
+}
+
+
+/* =========================================================
+   SALES
+========================================================= */
+
+function renderSales(){
+
+  const tbody =
+    document.getElementById(
+      'salesTable'
+    );
+
+
+  const sales =
+    [...db.sales]
+      .sort(
+        (a,b)=>
+          new Date(b.date)
+          -
+          new Date(a.date)
+      );
+
+
+  if(!sales.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="8" class="empty">
+          لا توجد مبيعات
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    sales.map(
+      sale=>{
+
+        const product =
+          db.products.find(
+            p=>p.id===sale.productId
+          );
+
+
+        const remaining =
+          number(sale.total)
+          -
+          number(sale.paid);
+
+
+        return `
+        <tr>
+
+          <td>
+            ${formatDate(sale.date)}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              sale.customer || 'زبون'
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              sale.productName ||
+              product?.name ||
+              '-'
+            )}
+          </td>
+
+          <td>
+            ${sale.qty}
+          </td>
+
+          <td>
+            ${money(sale.total)}
+          </td>
+
+          <td>
+            ${money(sale.paid)}
+          </td>
+
+          <td>
+            ${
+              remaining > 0
+              ?
+              `<span class="badge badge-red">
+                ${money(remaining)}
+              </span>`
+              :
+              `<span class="badge badge-green">
+                مؤدى
+              </span>`
+            }
+          </td>
+
+          <td>
+
+            <button
+              class="btn btn-danger"
+              onclick="deleteSale('${sale.id}')">
+              حذف
+            </button>
+
+          </td>
+
+        </tr>
+        `;
+
+      }
+    ).join('');
+
+}
+
+
+async function deleteSale(saleId){
+
+  const sale =
+    db.sales.find(
+      s=>s.id===saleId
+    );
+
+
+  if(!sale) return;
+
+
+  if(
+    !confirm(
+      'واش متأكد بغيتي تحذف هاد البيع؟'
+    )
+  )
+    return;
+
+
+  /*
+    نرجعو الكمية للمخزون
+  */
+
+  const product =
+    db.products.find(
+      p=>p.id===sale.productId
+    );
+
+
+  if(product){
+
+    product.qty =
+      number(product.qty)
+      +
+      number(sale.qty);
+
+  }
+
+
+  db.sales =
+    db.sales.filter(
+      s=>s.id!==saleId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف البيع ورجعت الكمية للمخزون');
+
+}
+
+
+/* =========================================================
+   EXPENSES
+========================================================= */
+
+function renderExpenses(){
+
+  const tbody =
+    document.getElementById(
+      'expensesTable'
+    );
+
+
+  const expenses =
+    [...db.expenses]
+      .sort(
+        (a,b)=>
+          new Date(b.date)
+          -
+          new Date(a.date)
+      );
+
+
+  if(!expenses.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="5" class="empty">
+          لا توجد مصاريف
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    expenses.map(
+      e=>`
+
+      <tr>
+
+        <td>
+          ${formatDate(e.date)}
+        </td>
+
+        <td>
+          ${escapeHtml(e.name)}
+        </td>
+
+        <td>
+          ${money(e.amount)}
+        </td>
+
+        <td>
+          ${escapeHtml(e.notes || '-')}
+        </td>
+
+        <td>
+
+          <button
+            class="btn btn-danger"
+            onclick="deleteExpense('${e.id}')">
+            حذف
+          </button>
+
+        </td>
+
+      </tr>
+
+      `
+    ).join('');
+
+}
+
+
+async function deleteExpense(expenseId){
+
+  if(
+    !confirm(
+      'واش متأكد بغيتي تحذف هاد المصروف؟'
+    )
+  )
+    return;
+
+
+  db.expenses =
+    db.expenses.filter(
+      e=>e.id!==expenseId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف المصروف');
+
+}
+
+
+/* =========================================================
+   CUSTOMERS
+========================================================= */
+
+function renderCustomers(){
+
+  const tbody =
+    document.getElementById(
+      'customersTable'
+    );
+
+  if(!db.customers.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="6" class="empty">
+          لا يوجد زبناء
+        </td>
+      </tr>`;
+
+    return;
+  }
+
+  tbody.innerHTML =
+    db.customers.map(
+      customer=>{
+
+        const sales =
+          db.sales.filter(
+            s =>
+              s.customerId ===
+              customer.id
+          );
+
+        const total =
+          sales.reduce(
+            (sum,s)=>
+              sum +
+              number(s.total),
+            0
+          );
+
+        const paid =
+          sales.reduce(
+            (sum,s)=>
+              sum +
+              number(s.paid),
+            0
+          );
+
+        const debt =
+          total - paid;
+
+        return `
+        <tr>
+
+          <td>
+            ${escapeHtml(
+              customer.name
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              customer.phone || '-'
+            )}
+          </td>
+
+          <td>
+            ${money(total)}
+          </td>
+
+          <td>
+            ${money(paid)}
+          </td>
+
+          <td>
+            ${
+              debt > 0
+              ?
+              `<span class="badge badge-red">
+                ${money(debt)}
+              </span>`
+              :
+              `<span class="badge badge-green">
+                لا يوجد
+              </span>`
+            }
+          </td>
+
+          <td>
+
+            ${
+              debt > 0
+              ?
+              `<button
+                class="btn btn-primary"
+                onclick="recordCustomerPayment('${customer.id}')">
+                أداء
+              </button>`
+              :
+              ''
+            }
+
+            <button
+              class="btn btn-danger"
+              onclick="deleteCustomer('${customer.id}')">
+              حذف
+            </button>
+
+          </td>
+
+        </tr>
+        `;
+
+      }
+    ).join('');
+}
+  async function recordCustomerPayment(customerId){
+
+  const customer =
+    db.customers.find(
+      c => c.id === customerId
+    );
+
+  if(!customer){
+    toast('الزبون غير موجود');
+    return;
+  }
+
+  const sales =
+    db.sales
+      .filter(
+        s =>
+          s.customerId === customerId &&
+          number(s.total) > number(s.paid)
+      )
+      .sort(
+        (a,b) =>
+          new Date(a.date || 0) -
+          new Date(b.date || 0)
+      );
+
+  const debt =
+    sales.reduce(
+      (sum,s) =>
+        sum +
+        (number(s.total) - number(s.paid)),
+      0
+    );
+
+  if(debt <= 0){
+    toast('ما عند هذا الزبون حتى دين');
+    return;
+  }
+
+  const value =
+    prompt(
+      `الدين الحالي: ${money(debt)}\n\nدخل المبلغ الذي خلص الزبون:`
+    );
+
+  if(value === null){
+    return;
+  }
+
+  const payment =
+    number(value);
+
+  if(payment <= 0){
+    toast('دخل مبلغ صحيح');
+    return;
+  }
+
+  if(payment > debt){
+    toast(`المبلغ أكبر من الدين. الدين الحالي: ${money(debt)}`);
+    return;
+  }
+
+  let remaining =
+    payment;
+
+  for(const sale of sales){
+
+    if(remaining <= 0){
+      break;
+    }
+
+    const saleDebt =
+      number(sale.total) -
+      number(sale.paid);
+
+    const amount =
+      Math.min(
+        remaining,
+        saleDebt
+      );
+
+    sale.paid =
+      number(sale.paid) +
+      amount;
+
+    remaining -=
+      amount;
+  }
+
+  await saveDB();
+
+  renderAll();
+
+  toast(
+    `تم تسجيل أداء ${money(payment)} بنجاح`
+  );
+}
+
+async function deleteCustomer(customerId){
+
+  const hasSales =
+    db.sales.some(
+      s=>s.customerId===customerId
+    );
+
+
+  if(hasSales){
+
+    toast(
+      'مايمكنش تحذف زبون عندو مبيعات'
+    );
+
+    return;
+
+  }
+
+
+  if(
+    !confirm(
+      'واش متأكد بغيتي تحذف الزبون؟'
+    )
+  )
+    return;
+
+
+  db.customers =
+    db.customers.filter(
+      c=>c.id!==customerId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف الزبون');
+
+}
+
+
+/* =========================================================
+   SUPPLIERS
+========================================================= */
+
+function renderSuppliers(){
+
+  const tbody =
+    document.getElementById(
+      'suppliersTable'
+    );
+
+
+  if(!db.suppliers.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="4" class="empty">
+          لا يوجد موردون
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    db.suppliers.map(
+      s=>`
+
+      <tr>
+
+        <td>
+          ${escapeHtml(s.name)}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            s.phone || '-'
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            s.notes || '-'
+          )}
+        </td>
+
+        <td>
+
+          <button
+            class="btn btn-danger"
+            onclick="deleteSupplier('${s.id}')">
+            حذف
+          </button>
+
+        </td>
+
+      </tr>
+
+      `
+    ).join('');
+
+}
+
+
+async function deleteSupplier(supplierId){
+
+  if(
+    !confirm(
+      'واش متأكد بغيتي تحذف المورد؟'
+    )
+  )
+    return;
+
+
+  db.suppliers =
+    db.suppliers.filter(
+      s=>s.id!==supplierId
+    );
+
+
+  await saveDB();
+
+  toast('تم حذف المورد');
+
+}
+
+
+/* =========================================================
+   REPORTS
+========================================================= */
+
+function renderReports(){
+
+  const s =
+    calculateStats();
+
+
+  document.getElementById(
+    'reportSales'
+  ).textContent =
+    money(s.sales);
+
+
+  document.getElementById(
+    'reportCost'
+  ).textContent =
+    money(s.cost);
+
+
+  document.getElementById(
+    'reportGross'
+  ).textContent =
+    money(s.gross);
+
+
+  document.getElementById(
+    'reportNet'
+  ).textContent =
+    money(s.net);
+
+
+  const tbody =
+    document.getElementById(
+      'reportStock'
+    );
+
+
+  if(!db.products.length){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="5" class="empty">
+          لا توجد منتجات
+        </td>
+      </tr>`;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    db.products.map(
+      p=>{
+
+        const qty =
+          number(p.qty);
+
+        const costValue =
+          qty *
+          number(p.cost);
+
+        const saleValue =
+          qty *
+          number(p.price);
+
+        const potentialProfit =
+          saleValue -
+          costValue;
+
+
+        return `
+        <tr>
+
+          <td>
+            ${escapeHtml(p.name)}
+          </td>
+
+          <td>
+            ${qty}
+          </td>
+
+          <td>
+            ${money(costValue)}
+          </td>
+
+          <td>
+            ${money(saleValue)}
+          </td>
+
+          <td>
+            ${money(potentialProfit)}
+          </td>
+
+        </tr>
+        `;
+
+      }
+    ).join('');
+
+}
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+function renderSettings(){
+
+  document.getElementById(
+    'shopName'
+  ).value =
+    db.settings.shop || '';
+
+
+  document.getElementById(
+    'managerName'
+  ).value =
+    db.settings.manager || '';
+
+
+  document.getElementById(
+    'minStock'
+  ).value =
+    db.settings.minStock ?? 3;
+
+
+  // زر تسجيل الخروج
+  let logoutBtn =
+    document.getElementById('logoutBtn');
+
+  if(!logoutBtn){
+
+    logoutBtn =
+      document.createElement('button');
+
+    logoutBtn.id = 'logoutBtn';
+
+    logoutBtn.type = 'button';
+
+    logoutBtn.textContent =
+      '🚪 تسجيل الخروج';
+
+    logoutBtn.style.cssText = `
+      width:100%;
+      margin-top:20px;
+      padding:13px;
+      border:0;
+      border-radius:10px;
+      background:#dc2626;
+      color:white;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+    `;
+
+    logoutBtn.onclick =
+      logoutUser;
+
+    const settingsPage =
+      document.getElementById('settings');
+
+    if(settingsPage){
+      settingsPage.appendChild(logoutBtn);
+    }
+
+  }
+
+}
+
+// تسجيل الخروج من الحساب
+async function logoutUser(){
+
+  if(!supabaseClient) return;
+
+  const confirmed = confirm(
+    'واش متأكد بغيتي تسجل الخروج؟'
+  );
+
+  if(!confirmed) return;
+
+  const { error } =
+    await supabaseClient.auth.signOut();
+
+  if(error){
+
+    alert(
+      'وقع مشكل أثناء تسجيل الخروج'
+    );
+
+    console.error(error);
+
+    return;
+  }
+
+  checkLogin();
+}
+/* =========================================================
+   RENDER ALL
+========================================================= */
+function ensureCategoryOptions(){
+
+  const select =
+    document.getElementById('pCategory');
+
+  if(!select)
+    return;
+
+  const categories = [
+    'سراويل',
+    'تيشورتات',
+    'قمصان',
+    'سبرديلات',
+    'جاكيتات',
+    'أخرى'
+  ];
+
+  select.innerHTML = categories
+    .map(category =>
+      `<option value="${category}">
+        ${category}
+      </option>`
+    )
+    .join('');
+
+}
+function renderSalesChart(){
+
+  const canvas =
+    document.getElementById('salesChart');
+
+  if(!canvas) return;
+
+  const sales = [...db.sales];
+
+  const grouped = {};
+
+  sales.forEach(sale => {
+
+    if(!sale.date) return;
+
+    const date =
+      String(sale.date).slice(0,10);
+
+    if(!date) return;
+
+    if(!grouped[date]){
+      grouped[date] = 0;
+    }
+
+    grouped[date] +=
+      Number(sale.total || 0);
+
+  });
+
+  const dates =
+    Object.keys(grouped).sort();
+
+  const values =
+    dates.map(date => grouped[date]);
+
+  if(window.salesChartInstance){
+    window.salesChartInstance.destroy();
+  }
+
+  window.salesChartInstance =
+    new Chart(canvas, {
+
+      type:'line',
+
+      data:{
+        labels:dates,
+
+        datasets:[{
+          label:'المبيعات DH',
+          data:values,
+          tension:0.3,
+          fill:true
+        }]
+      },
+
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+
+        scales:{
+          y:{
+            beginAtZero:true,
+            title:{
+              display:true,
+              text:'المبيعات بالدرهم'
+            }
+          },
+
+          x:{
+            title:{
+              display:true,
+              text:'التاريخ'
+            }
+          }
+        }
+      }
+
+    });
+
+}
+  // ===============================
+// LOGIN / AUTHENTICATION
+// ===============================
+
+async function checkLogin(){
+
+  if(!supabaseClient){
+    console.error('Supabase غير مهيأ');
+    return;
+  }
+
+  const {
+    data: { session }
+  } = await supabaseClient.auth.getSession();
+
+  const loginScreen =
+    document.getElementById('loginScreen');
+
+  const app =
+    document.querySelector('.app');
+
+  if(session){
+
+    if(loginScreen){
+      loginScreen.style.display = 'none';
+    }
+
+    if(app){
+      app.style.display = '';
+    }
+
+    renderAll();
+
+  }else{
+
+    if(loginScreen){
+      loginScreen.style.display = 'flex';
+    }
+
+    if(app){
+      app.style.display = 'none';
+    }
+
+  }
+}
+
+
+async function loginUser(){
+
+  const email =
+    document.getElementById('loginEmail').value.trim();
+
+  const password =
+    document.getElementById('loginPassword').value;
+
+  const errorBox =
+    document.getElementById('loginError');
+
+  errorBox.style.display = 'none';
+
+  const {
+    error
+  } = await supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if(error){
+
+    errorBox.textContent =
+      'البريد الإلكتروني أو كلمة السر غير صحيحة';
+
+    errorBox.style.display = 'block';
+
+    return;
+  }
+
+  await checkLogin();
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  const loginForm =
+    document.getElementById('loginForm');
+
+  if(loginForm){
+
+    loginForm.addEventListener(
+      'submit',
+      function(event){
+
+        event.preventDefault();
+
+        loginUser();
+
+      }
+    );
+
+  }
+
+  if(supabaseClient){
+
+    supabaseClient.auth.onAuthStateChange(
+      function(){
+
+        checkLogin();
+
+      }
+    )
+
+    checkLogin();
+
+  }
+
+});
+function renderAll(){
+
+  ensureCategoryOptions();
+
+  renderDashboard();
+
+  renderSalesChart();
+
+  renderProductSelect();
+
+  renderProducts();
+
+  renderSales();
+
+  renderExpenses();
+
+  renderCustomers();
+
+  renderSuppliers();
+
+  renderReports();
+
+  renderSettings();
+
+}
+
+
+/* =========================================================
+   PRODUCT FORM
+========================================================= */
+
+document
+  .getElementById('productForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const productId =
+        document.getElementById(
+          'productId'
+        ).value;
+
+
+      const name =
+        document.getElementById(
+          'pName'
+        ).value.trim();
+
+
+      const category =
+        document.getElementById(
+          'pCategory'
+        ).value;
+
+
+      const cost =
+        number(
+          document.getElementById(
+            'pCost'
+          ).value
+        );
+
+
+      const price =
+        number(
+          document.getElementById(
+            'pPrice'
+          ).value
+        );
+
+
+      const qty =
+        number(
+          document.getElementById(
+            'pQty'
+          ).value
+        );
+
+
+      const minStock =
+        number(
+          document.getElementById(
+            'pMin'
+          ).value
+        );
+
+
+      if(!name){
+
+        toast(
+          'دخل اسم المنتوج'
+        );
+
+        return;
+
+      }
+
+
+      if(productId){
+
+        const product =
+          db.products.find(
+            p=>p.id===productId
+          );
+
+
+        if(product){
+
+          product.name =
+            name;
+
+          product.category =
+            category;
+
+          product.cost =
+            cost;
+
+          product.price =
+            price;
+
+          product.qty =
+            qty;
+
+          product.minStock =
+            minStock;
+
+        }
+
+
+        toast(
+          'تم تعديل المنتوج'
+        );
+
+      }else{
+
+        db.products.push({
+
+          id:id(),
+
+          name,
+
+          category,
+
+          cost,
+
+          price,
+
+          qty,
+
+          minStock,
+
+          createdAt:dateNow()
+
+        });
+
+
+        toast(
+          'تمت إضافة المنتوج'
+        );
+
+      }
+
+
+      await saveDB();
+
+      resetProductForm();
+
+    }
+  );
+
+
+/* =========================================================
+   SALE FORM
+========================================================= */
+
+document
+  .getElementById('saleProduct')
+  .addEventListener(
+    'change',
+    function(){
+
+      const product =
+        db.products.find(
+          p=>p.id===this.value
+        );
+
+
+      if(product){
+
+        document.getElementById(
+          'salePrice'
+        ).value =
+          product.price;
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById('saleForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const productId =
+        document.getElementById(
+          'saleProduct'
+        ).value;
+
+
+      const product =
+        db.products.find(
+          p=>p.id===productId
+        );
+
+
+      if(!product){
+
+        toast(
+          'اختار المنتوج'
+        );
+
+        return;
+
+      }
+
+
+      const qty =
+        number(
+          document.getElementById(
+            'saleQty'
+          ).value
+        );
+
+
+      const price =
+        number(
+          document.getElementById(
+            'salePrice'
+          ).value
+        );
+
+
+      const paid =
+        number(
+          document.getElementById(
+            'salePaid'
+          ).value
+        );
+
+
+      if(qty<=0){
+
+        toast(
+          'الكمية خاصها تكون أكبر من 0'
+        );
+
+        return;
+
+      }
+
+
+      if(qty>number(product.qty)){
+
+        toast(
+          `المخزون غير كافي. المتوفر: ${product.qty}`
+        );
+
+        return;
+
+      }
+
+
+      if(price<0){
+
+        toast(
+          'الثمن غير صحيح'
+        );
+
+        return;
+
+      }
+
+
+      const total =
+        qty *
+        price;
+
+
+      if(paid>total){
+
+        toast(
+          'المبلغ المؤدى أكبر من مجموع البيع'
+        );
+
+        return;
+
+      }
+
+
+      let customerName =
+        document.getElementById(
+          'saleCustomer'
+        ).value.trim();
+
+
+      let customerId = null;
+
+
+      if(customerName){
+
+        let customer =
+          db.customers.find(
+            c=>
+              c.name
+                .trim()
+                .toLowerCase()
+              ===
+              customerName
+                .trim()
+                .toLowerCase()
+          );
+
+
+        if(!customer){
+
+          customer={
+
+            id:id(),
+
+            name:customerName,
+
+            phone:'',
+
+            createdAt:dateNow()
+
+          };
+
+
+          db.customers.push(
+            customer
+          );
+
+        }
+
+
+        customerId =
+          customer.id;
+
+      }
+
+
+      const sale={
+
+        id:id(),
+
+        date:dateNow(),
+
+        customer:
+          customerName || 'زبون',
+
+        customerId,
+
+        productId,
+
+        productName:
+          product.name,
+
+        qty,
+
+        price,
+
+        cost:
+          number(product.cost)
+          *
+          qty,
+
+        total,
+
+        paid,
+
+        paymentMethod:
+          document.getElementById(
+            'salePaymentMethod'
+          ).value,
+
+        notes:
+          document.getElementById(
+            'saleNotes'
+          ).value.trim()
+
+      };
+
+
+      db.sales.push(
+        sale
+      );
+
+
+      product.qty =
+        number(product.qty)
+        -
+        qty;
+
+
+      await saveDB();
+
+
+      this.reset();
+
+
+      document.getElementById(
+        'saleQty'
+      ).value=1;
+
+
+      document.getElementById(
+        'salePaid'
+      ).value=0;
+
+
+      toast(
+        'تم تسجيل البيع بنجاح'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   EXPENSE FORM
+========================================================= */
+
+document
+  .getElementById('expenseForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const name =
+        document.getElementById(
+          'expenseName'
+        ).value.trim();
+
+
+      const amount =
+        number(
+          document.getElementById(
+            'expenseAmount'
+          ).value
+        );
+
+
+      const notes =
+        document.getElementById(
+          'expenseNotes'
+        ).value.trim();
+
+
+      if(!name || amount<=0){
+
+        toast(
+          'دخل معلومات صحيحة'
+        );
+
+        return;
+
+      }
+
+
+      db.expenses.push({
+
+        id:id(),
+
+        date:dateNow(),
+
+        name,
+
+        amount,
+
+        notes
+
+      });
+
+
+      await saveDB();
+
+
+      this.reset();
+
+
+      toast(
+        'تم تسجيل المصروف'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   CUSTOMER FORM
+========================================================= */
+
+document
+  .getElementById('customerForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const name =
+        document.getElementById(
+          'customerName'
+        ).value.trim();
+
+
+      const phone =
+        document.getElementById(
+          'customerPhone'
+        ).value.trim();
+
+
+      if(!name){
+
+        toast(
+          'دخل اسم الزبون'
+        );
+
+        return;
+
+      }
+
+
+      db.customers.push({
+
+        id:id(),
+
+        name,
+
+        phone,
+
+        createdAt:dateNow()
+
+      });
+
+
+      await saveDB();
+
+
+      this.reset();
+
+
+      toast(
+        'تمت إضافة الزبون'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   SUPPLIER FORM
+========================================================= */
+
+document
+  .getElementById('supplierForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      const name =
+        document.getElementById(
+          'supplierName'
+        ).value.trim();
+
+
+      const phone =
+        document.getElementById(
+          'supplierPhone'
+        ).value.trim();
+
+
+      const notes =
+        document.getElementById(
+          'supplierNotes'
+        ).value.trim();
+
+
+      if(!name){
+
+        toast(
+          'دخل اسم المورد'
+        );
+
+        return;
+
+      }
+
+
+      db.suppliers.push({
+
+        id:id(),
+
+        name,
+
+        phone,
+
+        notes,
+
+        createdAt:dateNow()
+
+      });
+
+
+      await saveDB();
+
+
+      this.reset();
+
+
+      toast(
+        'تمت إضافة المورد'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   SETTINGS FORM
+========================================================= */
+
+document
+  .getElementById('settingsForm')
+  .addEventListener(
+    'submit',
+    async function(event){
+
+      event.preventDefault();
+
+
+      db.settings.shop =
+        document.getElementById(
+          'shopName'
+        ).value.trim();
+
+
+      db.settings.manager =
+        document.getElementById(
+          'managerName'
+        ).value.trim();
+
+
+      db.settings.minStock =
+        number(
+          document.getElementById(
+            'minStock'
+          ).value
+        );
+
+
+      await saveDB();
+
+
+      toast(
+        'تم حفظ الإعدادات'
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   BACKUP
+========================================================= */
+
+function exportBackup(){
+
+  const data =
+    JSON.stringify(
+      db,
+      null,
+      2
+    );
+
+
+  const blob =
+    new Blob(
+      [data],
+      {
+        type:'application/json'
+      }
+    );
+
+
+  const url =
+    URL.createObjectURL(blob);
+
+
+  const a =
+    document.createElement('a');
+
+
+  a.href=url;
+
+
+  a.download =
+    `Makkaoui-Backup-${new Date().toISOString().slice(0,10)}.json`;
+
+
+  a.click();
+
+
+  URL.revokeObjectURL(url);
+
+
+  toast(
+    'تم تحميل النسخة الاحتياطية'
+  );
+
+}
+
+
+function importBackup(event){
+
+  const file =
+    event.target.files[0];
+
+
+  if(!file)
+    return;
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+    async function(){
+
+      try{
+
+        const imported =
+          JSON.parse(
+            reader.result
+          );
+
+
+        db =
+          Object.assign(
+            blank(),
+            imported
+          );
+
+
+        await saveDB();
+
+
+        renderAll();
+
+
+        toast(
+          'تم استرجاع النسخة الاحتياطية'
+        );
+
+
+      }catch(error){
+
+        console.error(error);
+
+        toast(
+          'النسخة الاحتياطية غير صحيحة'
+        );
+
+      }
+
+    };
+
+
+  reader.readAsText(file);
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+renderAll();
+
+
+/*
+  نحاول نجيب البيانات من Cloud
+  بعد تحميل الصفحة.
+*/
+
+setTimeout(
+  ()=>{
+    loadCloudDB(false);
+  },
+  500
+);
+
+</script>
+
+</body>
+</html>
