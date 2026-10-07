@@ -730,6 +730,43 @@ th{
   <!-- DASHBOARD -->
   <section id="dashboard" class="page active">
 
+    <div class="panel" style="margin-bottom:18px;">
+      <div class="panel-head">
+        <h2>📅 فترة الإحصائيات</h2>
+      </div>
+
+      <div class="form-grid" style="align-items:end;">
+        <div class="field">
+          <label>الفترة</label>
+          <select id="dashboardPeriod" onchange="changeDashboardPeriod()">
+            <option value="today">اليوم</option>
+            <option value="week">هذا الأسبوع</option>
+            <option value="month" selected>هذا الشهر</option>
+            <option value="prevMonth">الشهر الماضي</option>
+            <option value="last3">آخر 3 أشهر</option>
+            <option value="year">هذه السنة</option>
+            <option value="prevYear">السنة الماضية</option>
+            <option value="all">منذ البداية</option>
+            <option value="custom">فترة مخصصة</option>
+          </select>
+        </div>
+
+        <div class="field" id="customFromWrap" style="display:none;">
+          <label>من</label>
+          <input id="dashboardFrom" type="date" onchange="changeDashboardPeriod()">
+        </div>
+
+        <div class="field" id="customToWrap" style="display:none;">
+          <label>إلى</label>
+          <input id="dashboardTo" type="date" onchange="changeDashboardPeriod()">
+        </div>
+
+        <div class="field">
+          <small id="dashboardPeriodLabel" style="display:block;padding:12px 0;font-weight:bold;color:#475467;"></small>
+        </div>
+      </div>
+    </div>
+
     <div class="cards">
 
       <div class="card">
@@ -771,7 +808,13 @@ th{
       <div class="card">
         <div class="card-title">قيمة المخزون</div>
         <div class="card-value" id="dashStock">0 DH</div>
-        <small>حسب تكلفة الشراء</small>
+        <small>حسب تكلفة الشراء الحالية</small>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💰 رأس المال</div>
+        <div class="card-value" id="dashCapital">0 DH</div>
+        <small>مستقل عن الأرباح</small>
       </div>
 
       <div class="card">
@@ -782,9 +825,28 @@ th{
 
     </div>
 
+    <div class="panel" style="margin-top:18px;">
+      <div class="panel-head">
+        <h2>📊 مقارنة مع الفترة السابقة</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>المؤشر</th>
+              <th>الفترة الحالية</th>
+              <th>الفترة السابقة</th>
+              <th>التغيير</th>
+            </tr>
+          </thead>
+          <tbody id="dashboardComparison"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-head">
-        <h2>📈 تطور المبيعات</h2>
+        <h2>📈 تطور المبيعات والأرباح</h2>
       </div>
 
       <div style="height:350px; padding:10px;">
@@ -1481,9 +1543,7 @@ th{
                    step="0.01"
                    placeholder="مثال: 60000">
 
-            <small style="color:#667085">
-              رأس المال مستقل عن المبيعات والأرباح.
-            </small>
+            <small>هذا المبلغ مستقل عن المبيعات والأرباح.</small>
           </div>
 
         </div>
@@ -1706,64 +1766,29 @@ async function saveDB(){
 }
 
 async function loadCloudDB(showMessage=false){
-
   if(!supabaseClient){
     if(showMessage) toast('تعذر الاتصال بـ Supabase');
-    return false;
+    return;
   }
 
   try{
-
-    const {data,error} =
-      await supabaseClient
-        .from('app_state')
-        .select('data')
-        .eq('id',1)
-        .maybeSingle();
+    const {data,error}=await supabaseClient
+      .from('app_state')
+      .select('data')
+      .eq('id',1)
+      .maybeSingle();
 
     if(error) throw error;
 
-    /*
-      مهم:
-      عند التحميل، Supabase هي المصدر الرئيسي.
-      ما نرفعوش localStorage للسحابة هنا،
-      باش ما نمسحوش البيانات القديمة.
-    */
+    const hasLocalData =
+      db.products.length>0 ||
+      db.sales.length>0 ||
+      db.expenses.length>0 ||
+      db.customers.length>0 ||
+      db.suppliers.length>0;
 
-    if(data && data.data){
-
-      const cloudData = data.data || {};
-
-      db = Object.assign(
-        blank(),
-        cloudData
-      );
-
-      db.settings = Object.assign(
-        blank().settings,
-        cloudData.settings || {}
-      );
-
-      localStorage.setItem(
-        KEY,
-        JSON.stringify(db)
-      );
-
-      renderAll();
-
-      if(showMessage)
-        toast('تم تحميل البيانات من السحابة ☁️');
-
-      return true;
-    }
-
-    /*
-      إذا ما كانت حتى بيانات فالسحابة،
-      ننشئو أول نسخة من البيانات المحلية.
-    */
-
-    const {error:insertError} =
-      await supabaseClient
+    if(hasLocalData){
+      const {error:upsertError}=await supabaseClient
         .from('app_state')
         .upsert({
           id:1,
@@ -1771,21 +1796,49 @@ async function loadCloudDB(showMessage=false){
           updated_at:new Date().toISOString()
         });
 
+      if(upsertError) throw upsertError;
+
+      localStorage.setItem(KEY,JSON.stringify(db));
+
+      if(showMessage)
+        toast('تمت مزامنة البيانات المحلية مع السحابة ☁️');
+
+      return;
+    }
+
+    if(data && data.data){
+      const cloudData = data.data || {};
+      db = Object.assign(blank(), cloudData);
+      db.settings = Object.assign(
+        blank().settings,
+        cloudData.settings || {}
+      );
+      localStorage.setItem(KEY,JSON.stringify(db));
+      renderAll();
+
+      if(showMessage)
+        toast('تم تحميل البيانات من السحابة ☁️');
+
+      return;
+    }
+
+    const {error:insertError}=await supabaseClient
+      .from('app_state')
+      .upsert({
+        id:1,
+        data:db,
+        updated_at:new Date().toISOString()
+      });
+
     if(insertError) throw insertError;
 
     if(showMessage)
       toast('تم إنشاء قاعدة البيانات السحابية ☁️');
 
-    return true;
-
   }catch(error){
-
     console.error('Cloud load error:',error);
-
     if(showMessage)
       toast('خدام محلياً — تعذر الاتصال بالسحابة');
-
-    return false;
   }
 }
 
@@ -1901,228 +1954,286 @@ function toggleSidebar(){
    DASHBOARD
 ========================================================= */
 
-function calculateStats(){
+let dashboardPeriod = 'month';
 
-  let sales = 0;
-
-  let cost = 0;
-
-  let paid = 0;
-
-
-  db.sales.forEach(
-    sale=>{
-
-      sales +=
-        number(sale.total);
-
-      paid +=
-        number(sale.paid);
-
-      cost +=
-        number(sale.cost);
-
-    }
-  );
-
-
-  let expenses = 0;
-
-  db.expenses.forEach(
-    e=>{
-      expenses +=
-        number(e.amount);
-    }
-  );
-
-
-  const gross =
-    sales - cost;
-
-  const net =
-    gross - expenses;
-
-  const debt =
-    sales - paid;
-
-
-  let stockValue = 0;
-
-  db.products.forEach(
-    p=>{
-
-      stockValue +=
-        number(p.qty)
-        *
-        number(p.cost);
-
-    }
-  );
-
-
-  return {
-
-    sales,
-
-    cost,
-
-    gross,
-
-    expenses,
-
-    net,
-
-    paid,
-
-    debt,
-
-    stockValue,
-
-    count:db.sales.length
-
-  };
-
+function localDateKey(date){
+  const y = date.getFullYear();
+  const m = String(date.getMonth()+1).padStart(2,'0');
+  const d = String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
 }
 
+function startOfDay(date){
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  return d;
+}
 
-function renderDashboard(){
+function addDays(date, days){
+  const d = new Date(date);
+  d.setDate(d.getDate()+days);
+  return d;
+}
 
-  const s =
-    calculateStats();
+function startOfWeek(date){
+  const d = startOfDay(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1-day;
+  d.setDate(d.getDate()+diff);
+  return d;
+}
 
+function startOfMonth(date){
+  const d = new Date(date.getFullYear(),date.getMonth(),1);
+  d.setHours(0,0,0,0);
+  return d;
+}
 
-  document.getElementById(
-    'dashSales'
-  ).textContent =
-    money(s.sales);
+function startOfYear(date){
+  const d = new Date(date.getFullYear(),0,1);
+  d.setHours(0,0,0,0);
+  return d;
+}
 
+function getDashboardRange(period = dashboardPeriod){
+  const now = new Date();
+  let from = null;
+  let to = null;
+  let previousFrom = null;
+  let previousTo = null;
+  let label = 'منذ البداية';
 
-  document.getElementById(
-    'dashGross'
-  ).textContent =
-    money(s.gross);
-
-
-  document.getElementById(
-    'dashExpenses'
-  ).textContent =
-    money(s.expenses);
-
-
-  document.getElementById(
-    'dashNet'
-  ).textContent =
-    money(s.net);
-
-
-  document.getElementById(
-    'dashCollected'
-  ).textContent =
-    money(s.paid);
-
-
-  document.getElementById(
-    'dashDebt'
-  ).textContent =
-    money(s.debt);
-
-
-  document.getElementById(
-    'dashStock'
-  ).textContent =
-    money(s.stockValue);
-
-
-  document.getElementById(
-    'dashCount'
-  ).textContent =
-    s.count;
-
-
-  const tbody =
-    document.getElementById(
-      'recentSales'
-    );
-
-
-  const sales =
-    [...db.sales]
-      .sort(
-        (a,b)=>
-          new Date(b.date)
-          -
-          new Date(a.date)
-      )
-      .slice(0,8);
-
-
-  if(!sales.length){
-
-    tbody.innerHTML =
-      `<tr>
-        <td colspan="5" class="empty">
-          لا توجد مبيعات بعد
-        </td>
-      </tr>`;
-
-    return;
-
+  if(period === 'today'){
+    from = startOfDay(now);
+    to = addDays(from,1);
+    previousFrom = addDays(from,-1);
+    previousTo = from;
+    label = 'اليوم';
+  }else if(period === 'week'){
+    from = startOfWeek(now);
+    to = addDays(from,7);
+    previousFrom = addDays(from,-7);
+    previousTo = from;
+    label = 'هذا الأسبوع';
+  }else if(period === 'month'){
+    from = startOfMonth(now);
+    to = new Date(now.getFullYear(),now.getMonth()+1,1);
+    previousFrom = new Date(now.getFullYear(),now.getMonth()-1,1);
+    previousTo = from;
+    label = 'هذا الشهر';
+  }else if(period === 'prevMonth'){
+    from = new Date(now.getFullYear(),now.getMonth()-1,1);
+    to = new Date(now.getFullYear(),now.getMonth(),1);
+    previousFrom = new Date(now.getFullYear(),now.getMonth()-2,1);
+    previousTo = from;
+    label = 'الشهر الماضي';
+  }else if(period === 'last3'){
+    from = new Date(now.getFullYear(),now.getMonth()-2,1);
+    to = new Date(now.getFullYear(),now.getMonth()+1,1);
+    previousFrom = new Date(now.getFullYear(),now.getMonth()-5,1);
+    previousTo = from;
+    label = 'آخر 3 أشهر';
+  }else if(period === 'year'){
+    from = startOfYear(now);
+    to = new Date(now.getFullYear()+1,0,1);
+    previousFrom = new Date(now.getFullYear()-1,0,1);
+    previousTo = from;
+    label = 'هذه السنة';
+  }else if(period === 'prevYear'){
+    from = new Date(now.getFullYear()-1,0,1);
+    to = new Date(now.getFullYear(),0,1);
+    previousFrom = new Date(now.getFullYear()-2,0,1);
+    previousTo = from;
+    label = 'السنة الماضية';
+  }else if(period === 'custom'){
+    const fromValue = document.getElementById('dashboardFrom')?.value;
+    const toValue = document.getElementById('dashboardTo')?.value;
+    if(fromValue && toValue){
+      from = new Date(`${fromValue}T00:00:00`);
+      to = addDays(new Date(`${toValue}T00:00:00`),1);
+      if(to <= from){
+        to = addDays(from,1);
+      }
+      const days = Math.max(1,Math.round((to-from)/86400000));
+      previousTo = from;
+      previousFrom = addDays(from,-days);
+      label = `من ${fromValue} إلى ${toValue}`;
+    }else{
+      label = 'فترة مخصصة — اختر التاريخ';
+    }
+  }else{
+    label = 'منذ البداية';
   }
 
-
-  tbody.innerHTML =
-    sales.map(
-      sale=>{
-
-        const remaining =
-          number(sale.total)
-          -
-          number(sale.paid);
-
-
-        return `
-        <tr>
-
-          <td>
-            ${formatDate(sale.date)}
-          </td>
-
-          <td>
-            ${escapeHtml(
-              sale.customer || 'زبون'
-            )}
-          </td>
-
-          <td>
-            ${money(sale.total)}
-          </td>
-
-          <td>
-            ${money(sale.paid)}
-          </td>
-
-          <td>
-            ${
-              remaining > 0
-              ?
-              `<span class="badge badge-red">
-                ${money(remaining)}
-              </span>`
-              :
-              `<span class="badge badge-green">
-                مؤدى
-              </span>`
-            }
-          </td>
-
-        </tr>
-        `;
-
-      }
-    ).join('');
-
+  return {from,to,previousFrom,previousTo,label};
 }
 
+function dateInRange(value, from, to){
+  if(!value) return false;
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return false;
+  if(from && d < from) return false;
+  if(to && d >= to) return false;
+  return true;
+}
+
+function calculateStats(from=null,to=null){
+  let sales = 0;
+  let cost = 0;
+  let paid = 0;
+  let count = 0;
+
+  db.sales.forEach(sale=>{
+    if(!dateInRange(sale.date,from,to)) return;
+    sales += number(sale.total);
+    paid += number(sale.paid);
+    cost += number(sale.cost);
+    count++;
+  });
+
+  let expenses = 0;
+  db.expenses.forEach(e=>{
+    if(!dateInRange(e.date,from,to)) return;
+    expenses += number(e.amount);
+  });
+
+  const gross = sales - cost;
+  const net = gross - expenses;
+  const debt = sales - paid;
+
+  let stockValue = 0;
+  db.products.forEach(p=>{
+    stockValue += number(p.qty) * number(p.cost);
+  });
+
+  return {
+    sales,
+    cost,
+    gross,
+    expenses,
+    net,
+    paid,
+    debt,
+    stockValue,
+    count
+  };
+}
+
+function changeDashboardPeriod(){
+  dashboardPeriod =
+    document.getElementById('dashboardPeriod')?.value || 'month';
+
+  const custom = dashboardPeriod === 'custom';
+  const fromWrap = document.getElementById('customFromWrap');
+  const toWrap = document.getElementById('customToWrap');
+
+  if(fromWrap) fromWrap.style.display = custom ? 'block' : 'none';
+  if(toWrap) toWrap.style.display = custom ? 'block' : 'none';
+
+  renderDashboard();
+  renderSalesChart();
+}
+
+function percentChange(current,previous){
+  if(previous === 0){
+    return current === 0 ? 0 : null;
+  }
+  return ((current-previous)/Math.abs(previous))*100;
+}
+
+function comparisonText(current,previous){
+  const change = percentChange(current,previous);
+  if(change === null) return 'جديد';
+  if(change === 0) return '0%';
+  return `${change > 0 ? '↑ +' : '↓ '}${change.toFixed(1)}%`;
+}
+
+function comparisonClass(current,previous){
+  if(current === previous) return 'badge';
+  return current > previous ? 'badge badge-green' : 'badge badge-red';
+}
+
+function renderDashboardComparison(current,previous,hasPrevious){
+  const tbody = document.getElementById('dashboardComparison');
+  if(!tbody) return;
+
+  if(!hasPrevious){
+    tbody.innerHTML = `<tr><td colspan="4" class="empty">اختر فترة محددة باش تبان المقارنة. "منذ البداية" ما عندهاش فترة سابقة.</td></tr>`;
+    return;
+  }
+
+  const rows = [
+    ['المبيعات',current.sales,previous.sales],
+    ['الربح الإجمالي',current.gross,previous.gross],
+    ['المصاريف',current.expenses,previous.expenses],
+    ['الربح الصافي',current.net,previous.net],
+    ['المبلغ المحصل',current.paid,previous.paid],
+    ['عدد المبيعات',current.count,previous.count]
+  ];
+
+  tbody.innerHTML = rows.map(row=>`
+    <tr>
+      <td>${row[0]}</td>
+      <td>${typeof row[1] === 'number' && row[0] === 'عدد المبيعات' ? row[1] : money(row[1])}</td>
+      <td>${typeof row[2] === 'number' && row[0] === 'عدد المبيعات' ? row[2] : money(row[2])}</td>
+      <td><span class="${comparisonClass(row[1],row[2])}">${comparisonText(row[1],row[2])}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderDashboard(){
+  const range = getDashboardRange();
+  const s = calculateStats(range.from,range.to);
+  const previous = range.previousFrom && range.previousTo
+    ? calculateStats(range.previousFrom,range.previousTo)
+    : null;
+
+  const periodSelect = document.getElementById('dashboardPeriod');
+  if(periodSelect) periodSelect.value = dashboardPeriod;
+
+  const custom = dashboardPeriod === 'custom';
+  const fromWrap = document.getElementById('customFromWrap');
+  const toWrap = document.getElementById('customToWrap');
+  if(fromWrap) fromWrap.style.display = custom ? 'block' : 'none';
+  if(toWrap) toWrap.style.display = custom ? 'block' : 'none';
+
+  const periodLabel = document.getElementById('dashboardPeriodLabel');
+  if(periodLabel) periodLabel.textContent = `الفترة الحالية: ${range.label}`;
+
+  document.getElementById('dashSales').textContent = money(s.sales);
+  document.getElementById('dashGross').textContent = money(s.gross);
+  document.getElementById('dashExpenses').textContent = money(s.expenses);
+  document.getElementById('dashNet').textContent = money(s.net);
+  document.getElementById('dashCollected').textContent = money(s.paid);
+  document.getElementById('dashDebt').textContent = money(s.debt);
+  document.getElementById('dashStock').textContent = money(s.stockValue);
+  document.getElementById('dashCapital').textContent = money(db.settings.capital ?? 0);
+  document.getElementById('dashCount').textContent = s.count;
+
+  renderDashboardComparison(s,previous,!!previous);
+
+  const tbody = document.getElementById('recentSales');
+  const sales = [...db.sales]
+    .sort((a,b)=>new Date(b.date)-new Date(a.date))
+    .slice(0,8);
+
+  if(!sales.length){
+    tbody.innerHTML = `<tr><td colspan="5" class="empty">لا توجد مبيعات بعد</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = sales.map(sale=>{
+    const remaining = number(sale.total)-number(sale.paid);
+    return `
+      <tr>
+        <td>${formatDate(sale.date)}</td>
+        <td>${escapeHtml(sale.customer || 'زبون')}</td>
+        <td>${money(sale.total)}</td>
+        <td>${money(sale.paid)}</td>
+        <td>${remaining > 0 ? `<span class="badge badge-red">${money(remaining)}</span>` : `<span class="badge badge-green">مؤدى</span>`}</td>
+      </tr>`;
+  }).join('');
+}
 
 /* =========================================================
    PRODUCTS
@@ -3282,86 +3393,50 @@ function ensureCategoryOptions(){
 
 }
 function renderSalesChart(){
+  const canvas = document.getElementById('salesChart');
+  if(!canvas || typeof Chart === 'undefined') return;
 
-  const canvas =
-    document.getElementById('salesChart');
-
-  if(!canvas) return;
-
-  const sales = [...db.sales];
-
+  const range = getDashboardRange();
   const grouped = {};
 
-  sales.forEach(sale => {
-
-    if(!sale.date) return;
-
-    const date =
-      String(sale.date).slice(0,10);
-
-    if(!date) return;
-
-    if(!grouped[date]){
-      grouped[date] = 0;
-    }
-
-    grouped[date] +=
-      Number(sale.total || 0);
-
+  db.sales.forEach(sale=>{
+    if(!dateInRange(sale.date,range.from,range.to)) return;
+    const d = new Date(sale.date);
+    if(Number.isNaN(d.getTime())) return;
+    const key = dashboardPeriod === 'year' || dashboardPeriod === 'prevYear'
+      ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
+      : localDateKey(d);
+    grouped[key] = (grouped[key] || 0) + number(sale.total);
   });
 
-  const dates =
-    Object.keys(grouped).sort();
+  const dates = Object.keys(grouped).sort();
+  const values = dates.map(date=>grouped[date]);
 
-  const values =
-    dates.map(date => grouped[date]);
+  if(window.salesChartInstance) window.salesChartInstance.destroy();
 
-  if(window.salesChartInstance){
-    window.salesChartInstance.destroy();
-  }
-
-  window.salesChartInstance =
-    new Chart(canvas, {
-
-      type:'line',
-
-      data:{
-        labels:dates,
-
-        datasets:[{
-          label:'المبيعات DH',
-          data:values,
-          tension:0.3,
-          fill:true
-        }]
-      },
-
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-
-        scales:{
-          y:{
-            beginAtZero:true,
-            title:{
-              display:true,
-              text:'المبيعات بالدرهم'
-            }
-          },
-
-          x:{
-            title:{
-              display:true,
-              text:'التاريخ'
-            }
-          }
-        }
+  window.salesChartInstance = new Chart(canvas,{
+    type:'line',
+    data:{
+      labels:dates,
+      datasets:[{
+        label:'المبيعات DH',
+        data:values,
+        tension:0.3,
+        fill:true
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        y:{beginAtZero:true,title:{display:true,text:'المبيعات بالدرهم'}},
+        x:{title:{display:true,text:'التاريخ'}}
       }
-
-    });
-
+    }
+  });
 }
-  // ===============================
+  
+// ===============================
 // LOGIN / AUTHENTICATION
 // ===============================
 
@@ -3392,7 +3467,6 @@ async function checkLogin(){
       app.style.display = '';
     }
 
-    await loadCloudDB(false);
     renderAll();
 
   }else{
@@ -4154,12 +4228,11 @@ document
           ).value
         );
 
+      const capitalInput =
+        document.getElementById('capital');
+
       db.settings.capital =
-        number(
-          document.getElementById(
-            'capital'
-          )?.value
-        );
+        capitalInput ? number(capitalInput.value) : (db.settings.capital ?? 0);
 
 
       await saveDB();
@@ -4293,9 +4366,16 @@ renderAll();
 
 
 /*
-  Cloud data is loaded after successful authentication
-  inside checkLogin().
+  نحاول نجيب البيانات من Cloud
+  بعد تحميل الصفحة.
 */
+
+setTimeout(
+  ()=>{
+    loadCloudDB(false);
+  },
+  500
+);
 
 </script>
 
