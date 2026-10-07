@@ -1472,6 +1472,22 @@ th{
                    min="0">
           </div>
 
+          <div class="field">
+            <label>💰 رأس مال المشروع (DH)</label>
+
+            <input id="capital"
+                   type="number"
+                   min="0"
+                   step="0.01"
+                   placeholder="مثال: 60000">
+
+            <small style="color:#667085">
+              رأس المال مستقل عن المبيعات والأرباح.
+            </small>
+          </div>
+
+        </div>
+
         <br>
 
         <button class="btn btn-primary">
@@ -1591,7 +1607,8 @@ function blank(){
     settings:{
       shop:'Makkaoui Clothes',
       manager:'',
-      minStock:3
+      minStock:3,
+      capital:0
     }
   };
 }
@@ -1689,29 +1706,64 @@ async function saveDB(){
 }
 
 async function loadCloudDB(showMessage=false){
+
   if(!supabaseClient){
     if(showMessage) toast('تعذر الاتصال بـ Supabase');
-    return;
+    return false;
   }
 
   try{
-    const {data,error}=await supabaseClient
-      .from('app_state')
-      .select('data')
-      .eq('id',1)
-      .maybeSingle();
+
+    const {data,error} =
+      await supabaseClient
+        .from('app_state')
+        .select('data')
+        .eq('id',1)
+        .maybeSingle();
 
     if(error) throw error;
 
-    const hasLocalData =
-      db.products.length>0 ||
-      db.sales.length>0 ||
-      db.expenses.length>0 ||
-      db.customers.length>0 ||
-      db.suppliers.length>0;
+    /*
+      مهم:
+      عند التحميل، Supabase هي المصدر الرئيسي.
+      ما نرفعوش localStorage للسحابة هنا،
+      باش ما نمسحوش البيانات القديمة.
+    */
 
-    if(hasLocalData){
-      const {error:upsertError}=await supabaseClient
+    if(data && data.data){
+
+      const cloudData = data.data || {};
+
+      db = Object.assign(
+        blank(),
+        cloudData
+      );
+
+      db.settings = Object.assign(
+        blank().settings,
+        cloudData.settings || {}
+      );
+
+      localStorage.setItem(
+        KEY,
+        JSON.stringify(db)
+      );
+
+      renderAll();
+
+      if(showMessage)
+        toast('تم تحميل البيانات من السحابة ☁️');
+
+      return true;
+    }
+
+    /*
+      إذا ما كانت حتى بيانات فالسحابة،
+      ننشئو أول نسخة من البيانات المحلية.
+    */
+
+    const {error:insertError} =
+      await supabaseClient
         .from('app_state')
         .upsert({
           id:1,
@@ -1719,44 +1771,21 @@ async function loadCloudDB(showMessage=false){
           updated_at:new Date().toISOString()
         });
 
-      if(upsertError) throw upsertError;
-
-      localStorage.setItem(KEY,JSON.stringify(db));
-
-      if(showMessage)
-        toast('تمت مزامنة البيانات المحلية مع السحابة ☁️');
-
-      return;
-    }
-
-    if(data && data.data){
-      db=Object.assign(blank(),data.data);
-      localStorage.setItem(KEY,JSON.stringify(db));
-      renderAll();
-
-      if(showMessage)
-        toast('تم تحميل البيانات من السحابة ☁️');
-
-      return;
-    }
-
-    const {error:insertError}=await supabaseClient
-      .from('app_state')
-      .upsert({
-        id:1,
-        data:db,
-        updated_at:new Date().toISOString()
-      });
-
     if(insertError) throw insertError;
 
     if(showMessage)
       toast('تم إنشاء قاعدة البيانات السحابية ☁️');
 
+    return true;
+
   }catch(error){
+
     console.error('Cloud load error:',error);
+
     if(showMessage)
       toast('خدام محلياً — تعذر الاتصال بالسحابة');
+
+    return false;
   }
 }
 
@@ -3144,6 +3173,14 @@ function renderSettings(){
   ).value =
     db.settings.minStock ?? 3;
 
+  const capitalInput =
+    document.getElementById('capital');
+
+  if(capitalInput){
+    capitalInput.value =
+      db.settings.capital ?? 0;
+  }
+
 
   // زر تسجيل الخروج
   let logoutBtn =
@@ -3355,6 +3392,7 @@ async function checkLogin(){
       app.style.display = '';
     }
 
+    await loadCloudDB(false);
     renderAll();
 
   }else{
@@ -4116,6 +4154,13 @@ document
           ).value
         );
 
+      db.settings.capital =
+        number(
+          document.getElementById(
+            'capital'
+          )?.value
+        );
+
 
       await saveDB();
 
@@ -4248,16 +4293,9 @@ renderAll();
 
 
 /*
-  نحاول نجيب البيانات من Cloud
-  بعد تحميل الصفحة.
+  Cloud data is loaded after successful authentication
+  inside checkLogin().
 */
-
-setTimeout(
-  ()=>{
-    loadCloudDB(false);
-  },
-  500
-);
 
 </script>
 
